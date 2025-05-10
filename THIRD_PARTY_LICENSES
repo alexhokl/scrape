@@ -1,0 +1,6 @@
+This project uses Cobra (https://github.com/spf13/cobra), which is licensed under the Apache License 2.0.
+
+Copyright (c) 2013 Steve Francia and contributors
+
+The full text of the Apache License 2.0 can be found at:
+https://github.com/spf13/cobra/blob/main/LICENSE.txt
