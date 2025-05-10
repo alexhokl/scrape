@@ -49,6 +49,7 @@ func validateArticleOptions(_ *cobra.Command, _ []string) error {
 
 	switch opts.source {
 	case "guardian":
+	case "microsoft":
 		break
 
 	default:

@@ -18,8 +18,9 @@ func CreateLinkScraper(sourceType string) (LinkScraper, error) {
 func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 	switch sourceType {
 	case "guardian":
-		scraper := &GuardianScraper{}
-		return scraper, nil
+		return &GuardianScraper{}, nil
+	case "microsoft":
+		return &MicrosoftLearnScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
