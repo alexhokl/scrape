@@ -39,10 +39,18 @@ func (g *GuardianScraper) ScrapeArticle(url string) (string, error) {
 
 	var markdown string
 
+	// title
 	c.OnHTML("h1", func(e *colly.HTMLElement) {
 		markdown += fmt.Sprintf("# %s\n\n", e.Text)
 	})
-	c.OnHTML("p", func(e *colly.HTMLElement) {
+
+	// subtitle
+	c.OnHTML("div[data-gu-name=standfirst] p", func(e *colly.HTMLElement) {
+		markdown += fmt.Sprintf("## %s\n\n", e.Text)
+	})
+
+	// article body
+	c.OnHTML("div.article-body-commercial-selector p", func(e *colly.HTMLElement) {
 		markdown += fmt.Sprintf("%s\n\n", e.Text)
 	})
 
