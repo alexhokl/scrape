@@ -1,5 +1,8 @@
 version: "3"
 
+env:
+  APP_NAME: scrape
+
 tasks:
   build:
     desc: Build
@@ -37,8 +40,8 @@ tasks:
 
   completion-mac:
     desc: Generate bash completion and save to homebrew
-    cmd: strava-cli completion bash > /opt/homebrew/etc/bash_completion.d/scrape
+    cmd: $APP_NAME completion bash > /opt/homebrew/etc/bash_completion.d/$APP_NAME
 
   completion-linux:
     desc: Generate bash completion and save configuration directory
-    cmd: strava-cli completion bash | sudo tee /etc/bash_completion.d/scrape
+    cmd: $APP_NAME completion bash | sudo tee /etc/bash_completion.d/$APP_NAME
