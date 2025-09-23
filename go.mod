@@ -1,8 +1,11 @@
 module github.com/alexhokl/scrape
 
-go 1.24.2
+go 1.25.0
 
-require github.com/alexhokl/helper v0.0.89
+require (
+	github.com/alexhokl/helper v0.0.89
+	golang.org/x/net v0.39.0
+)
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3 // indirect
@@ -16,7 +19,6 @@ require (
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
-	golang.org/x/net v0.39.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
