@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gocolly/colly"
 	"golang.org/x/net/html"
@@ -24,39 +25,33 @@ func (g *MicrosoftLearnScraper) ScrapeArticle(url string) (string, error) {
 
 	// article
 	c.OnHTML("div.content", func(e *colly.HTMLElement) {
-		for _, n := range e.DOM.Children().Nodes {
-			if n.Type != html.ElementNode {
-				continue
-			}
-			switch n.Data {
-			case "p":
-				markdown += fmt.Sprintf("%s\n\n", dumpTextInNode(n))
-			case "ul":
-				for li := range n.ChildNodes() {
-					if li.Type == html.ElementNode && li.Data == "li" {
-						markdown += fmt.Sprintf("* %s\n", dumpTextInNode(li))
-					}
-				}
-				markdown += fmt.Sprintln()
-			case "div":
-				if containsCssClass(n, "NOTE") {
-					for p := range n.ChildNodes() {
-						if p.Type == html.ElementNode && p.Data == "p" {
-							if containsCssClass(p, "alert") {
-								continue
-							}
-							markdown += fmt.Sprintf("> %s\n\n", dumpTextInNode(p))
-						}
-					}
+		e.ForEach("*", func(_ int, child *colly.HTMLElement) {
+			if child.DOM.Parent().IsSelection(e.DOM) {
+				switch child.Name {
+				case "p":
+					markdown += fmt.Sprintf("%s\n\n", parseMicrosoftParagraph(child))
+				case "ul":
+					child.ForEach("li", func(_ int, li *colly.HTMLElement) {
+						markdown += fmt.Sprintf("* %s\n", parseMicrosoftParagraph(li))
+					})
 					markdown += fmt.Sprintln()
+				case "div":
+					if child.DOM.HasClass("NOTE") {
+						child.ForEach("p", func(_ int, p *colly.HTMLElement) {
+							if p.DOM.HasClass("alert") {
+								return
+							}
+							markdown += fmt.Sprintf("> %s\n\n", parseMicrosoftParagraph(p))
+						})
+						markdown += fmt.Sprintln()
+					}
+				case "h2":
+					markdown += fmt.Sprintf("## %s\n\n", child.Text)
+				case "h3":
+					markdown += fmt.Sprintf("### %s\n\n", child.Text)
 				}
-			case "h2":
-				markdown += fmt.Sprintf("## %s\n\n", n.FirstChild.Data)
-			case "h3":
-				markdown += fmt.Sprintf("### %s\n\n", n.FirstChild.Data)
-			default:
 			}
-		}
+		})
 	})
 
 	err := c.Visit(url)
@@ -67,21 +62,24 @@ func (g *MicrosoftLearnScraper) ScrapeArticle(url string) (string, error) {
 	return markdown, nil
 }
 
-func dumpTextInNode(node *html.Node) string {
-	markdown := ""
-	for child := range node.ChildNodes() {
-		switch child.Type {
+func parseMicrosoftParagraph(p *colly.HTMLElement) string {
+	builder := strings.Builder{}
+
+	p.ForEach("*", func(_ int, child *colly.HTMLElement) {
+		// check if child is a text node
+		switch child.DOM.Nodes[0].Type {
 		case html.TextNode:
-			markdown += fmt.Sprint(child.Data)
+			builder.WriteString(child.Text)
 		case html.ElementNode:
-			if child.Data == "span" {
+			if child.Name == "span" {
 				// it is likely an image in Microsoft Learn
-				markdown += "_image_"
-				continue
+				builder.WriteString("_image_")
+				return
 			}
-			markdown += fmt.Sprintf("**%s**", dumpTextInNode(child))
-		default:
+			// for other element nodes, we can just bold the text
+			builder.WriteString(fmt.Sprintf("**%s**", parseMicrosoftParagraph(child)))
 		}
-	}
-	return markdown
+	})
+
+	return builder.String()
 }

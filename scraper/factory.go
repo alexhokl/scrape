@@ -23,6 +23,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &MicrosoftLearnScraper{}, nil
 	case "go":
 		return &GoDocScraper{}, nil
+	case "tofugu":
+		return &TofuguScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)

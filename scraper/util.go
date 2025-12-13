@@ -1,41 +1,38 @@
+// Package scraper contains utility functions for HTML scraping.
 package scraper
 
 import (
-	"fmt"
 	"strings"
-
-	"golang.org/x/net/html"
 )
 
-func containsCssClass(node *html.Node, class string) bool {
-	if node.Type == html.ElementNode {
-		for _, attr := range node.Attr {
-			if attr.Key == "class" {
-				for c := range strings.SplitSeq(attr.Val, " ") {
-					if c == class {
-						return true
-					}
-				}
+func removeExtraSpaces(rawText string) string {
+	strings := []rune(rawText)
+	cleaned := make([]rune, 0, len(strings))
+	spaceFound := false
+	for _, r := range strings {
+		if r == '\n' || r == '\r' {
+			continue
+		}
+		if r == ' ' {
+			if !spaceFound {
+				cleaned = append(cleaned, r)
+				spaceFound = true
 			}
+		} else {
+			cleaned = append(cleaned, r)
+			spaceFound = false
 		}
 	}
-	return false
+
+	return string(cleaned)
 }
 
-func printCssClasses(node *html.Node) {
-	if node.Type == html.ElementNode {
-		for _, attr := range node.Attr {
-			if attr.Key == "class" {
-				fmt.Println(attr.Val)
-			}
-		}
-	}
-}
-
-func printAttributes(node *html.Node) {
-	if node.Type == html.ElementNode {
-		for _, attr := range node.Attr {
-			fmt.Printf("%s: %s\n", attr.Key, attr.Val)
-		}
-	}
+func trimSpacesAndLineBreaks(input string) string {
+	return strings.Trim(
+		strings.Trim(
+			strings.Trim(input, " "),
+			"\n",
+		),
+		" ",
+	)
 }

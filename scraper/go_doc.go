@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gocolly/colly"
 	"golang.org/x/net/html"
@@ -24,50 +25,40 @@ func (g *GoDocScraper) ScrapeArticle(url string) (string, error) {
 
 	// article
 	c.OnHTML("article", func(e *colly.HTMLElement) {
-		for _, n := range e.DOM.Children().Nodes {
-			if n.Type != html.ElementNode {
-				continue
-			}
-			switch n.Data {
-			case "h2":
-				markdown += fmt.Sprintf("## %s\n\n", n.FirstChild.Data)
-			case "h3":
-				markdown += fmt.Sprintf("### %s\n\n", n.FirstChild.Data)
-			case "p":
-				markdown += fmt.Sprintf("%s\n\n", getTextInNode(n))
-			case "ul":
-				for li := range n.ChildNodes() {
-					if li.Type != html.ElementNode {
-						continue
-					}
-					if li.Data == "li" {
-						markdown += fmt.Sprintf("* %s\n", getTextInNode(li))
-					}
-				}
-				markdown += fmt.Sprintln()
-			case "div":
-				if containsCssClass(n, "NOTE") {
-					for p := range n.ChildNodes() {
-						if p.Type == html.ElementNode && p.Data == "p" {
-							if containsCssClass(p, "alert") {
-								continue
+		e.ForEach("*", func(_ int, child *colly.HTMLElement) {
+			if child.DOM.Parent().IsSelection(e.DOM) {
+				switch child.Name {
+				case "h2":
+					markdown += fmt.Sprintf("## %s\n\n", child.Text)
+				case "h3":
+					markdown += fmt.Sprintf("### %s\n\n", child.Text)
+				case "p":
+					markdown += fmt.Sprintf("%s\n\n", parseGoDocParagraph(child))
+				case "ul":
+					child.ForEach("li", func(_ int, li *colly.HTMLElement) {
+						markdown += fmt.Sprintf("* %s\n", parseGoDocParagraph(li))
+					})
+					markdown += fmt.Sprintln()
+				case "div":
+					if child.DOM.HasClass("NOTE") {
+						child.ForEach("p", func(_ int, p *colly.HTMLElement) {
+							if p.DOM.HasClass("alert") {
+								return
 							}
-							markdown += fmt.Sprintf("> %s\n\n", getTextInNode(p))
-						}
+							markdown += fmt.Sprintf("> %s\n\n", parseGoDocParagraph(p))
+						})
+						markdown += fmt.Sprintln()
 					}
+				case "pre":
+					markdown += fmt.Sprintln("```")
+					child.ForEach("code", func(_ int, code *colly.HTMLElement) {
+						markdown += fmt.Sprintln(parseGoDocParagraph(code))
+					})
+					markdown += fmt.Sprintln("```")
 					markdown += fmt.Sprintln()
 				}
-			case "pre":
-				markdown += "```\n"
-				for child := range n.ChildNodes() {
-					if child.Type == html.ElementNode && child.Data == "code" {
-						markdown += fmt.Sprintln(getTextInNode(child))
-					}
-				}
-				markdown += "```\n\n"
-			default:
 			}
-		}
+		})
 	})
 
 	err := c.Visit(url)
@@ -78,36 +69,33 @@ func (g *GoDocScraper) ScrapeArticle(url string) (string, error) {
 	return markdown, nil
 }
 
-func getTextInNode(node *html.Node) string {
-	markdown := ""
-	for child := range node.ChildNodes() {
-		switch child.Type {
+func parseGoDocParagraph(p *colly.HTMLElement) string {
+	builder := strings.Builder{}
+
+	p.ForEach("*", func(_ int, child *colly.HTMLElement) {
+		switch child.DOM.Nodes[0].Type {
 		case html.TextNode:
-			markdown += fmt.Sprint(child.Data)
+			builder.WriteString(child.Text)
 		case html.ElementNode:
-			if child.Data == "img" {
-				markdown += "_image_"
-				continue
+			if child.Name == "img" {
+				// it is likely an image in GoDoc
+				builder.WriteString("_image_")
+				return
 			}
-			text := getTextInNode(child)
+			text := parseGoDocParagraph(child)
 			if text == "" {
-				continue
+				return
 			}
-			if node.Data == "li" && child.Data == "ul" {
+			if p.Name == "li" && child.Name == "ul" {
 				// list in list
-				for subListItem := range child.ChildNodes() {
-					if subListItem.Type != html.ElementNode {
-						continue
-					}
-					if subListItem.Data == "li" {
-						markdown += fmt.Sprintf("  * %s\n", getTextInNode(subListItem))
-					}
-				}
-				continue
+				child.ForEach("li", func(_ int, subListItem *colly.HTMLElement) {
+					builder.WriteString(fmt.Sprintf("  * %s\n", parseGoDocParagraph(subListItem)))
+				})
+				return
 			}
-			markdown += fmt.Sprintf("**%s**", text)
-		default:
+			builder.WriteString(fmt.Sprintf("**%s**", text))
 		}
-	}
-	return markdown
+	})
+
+	return builder.String()
 }
