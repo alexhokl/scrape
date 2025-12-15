@@ -27,10 +27,21 @@ func (g *TofuguScraper) ScrapeArticle(url string) (string, error) {
 		markdown += fmt.Sprintf("%s\n\n", trimSpacesAndLineBreaks(e.Text))
 	})
 
+	foundBody := false
+
 	// article body
 	c.OnHTML("article div.main", func(e *colly.HTMLElement) {
+		foundBody = true
 		markdown += parseTofuguArticle(e)
 	})
+
+	if !foundBody {
+		// try alternative selector
+		c.OnHTML("article div.article-content div.container", func(e *colly.HTMLElement) {
+			foundBody = true
+			markdown += parseTofuguArticle(e)
+		})
+	}
 
 	err := c.Visit(url)
 	if err != nil {
