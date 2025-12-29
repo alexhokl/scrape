@@ -21,6 +21,7 @@ func (m *mockLinkScraper) ScrapeLinks(url string) (map[string]string, error) {
 // mockArticleScraper is a test implementation of ArticleScraper
 type mockArticleScraper struct {
 	content string
+	title   string
 	err     error
 }
 
@@ -29,6 +30,20 @@ func (m *mockArticleScraper) ScrapeArticle(url string) (string, error) {
 		return "", m.err
 	}
 	return m.content, nil
+}
+
+func (m *mockArticleScraper) ScrapeTitle(url string) (string, error) {
+	if m.err != nil {
+		return "", m.err
+	}
+	return m.title, nil
+}
+
+func (m *mockArticleScraper) ScrapeFilename(url string) (string, error) {
+	if m.err != nil {
+		return "", m.err
+	}
+	return m.title, nil
 }
 
 // Compile-time interface implementation checks
@@ -100,7 +115,8 @@ func TestLinkScraper_ReturnsError(t *testing.T) {
 
 func TestArticleScraper_ReturnsContent(t *testing.T) {
 	expectedContent := "# Article Title\n\nThis is the article content in markdown format."
-	scraper := &mockArticleScraper{content: expectedContent}
+	expectedTitle := "Article Title"
+	scraper := &mockArticleScraper{content: expectedContent, title: expectedTitle}
 
 	content, err := scraper.ScrapeArticle("https://example.com/article")
 

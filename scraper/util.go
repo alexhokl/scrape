@@ -36,3 +36,13 @@ func trimSpacesAndLineBreaks(input string) string {
 		" ",
 	)
 }
+
+func generateFileNameFromTitle(title string) string {
+	return strings.ToLower(
+		strings.ReplaceAll(
+			strings.ReplaceAll(title, " ", "_"),
+			"__",
+			"_",
+		),
+	)
+}

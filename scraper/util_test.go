@@ -167,3 +167,101 @@ func TestTrimSpacesAndLineBreaks(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateFileNameFromTitle(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "simple title",
+			input:    "Hello World",
+			expected: "hello_world",
+		},
+		{
+			name:     "already lowercase",
+			input:    "hello world",
+			expected: "hello_world",
+		},
+		{
+			name:     "all uppercase",
+			input:    "HELLO WORLD",
+			expected: "hello_world",
+		},
+		{
+			name:     "single word",
+			input:    "Introduction",
+			expected: "introduction",
+		},
+		{
+			name:     "multiple spaces become single underscore",
+			input:    "Hello  World",
+			expected: "hello_world",
+		},
+		{
+			name:     "three spaces become single underscore",
+			input:    "Hello   World",
+			expected: "hello__world",
+		},
+		{
+			name:     "preserves numbers",
+			input:    "Version 2.0 Release",
+			expected: "version_2.0_release",
+		},
+		{
+			name:     "preserves special characters",
+			input:    "Go: The Language",
+			expected: "go:_the_language",
+		},
+		{
+			name:     "preserves unicode characters",
+			input:    "Go 言語入門",
+			expected: "go_言語入門",
+		},
+		{
+			name:     "leading space",
+			input:    " Hello World",
+			expected: "_hello_world",
+		},
+		{
+			name:     "trailing space",
+			input:    "Hello World ",
+			expected: "hello_world_",
+		},
+		{
+			name:     "mixed case with numbers",
+			input:    "Azure SDK 2.0 Release Notes",
+			expected: "azure_sdk_2.0_release_notes",
+		},
+		{
+			name:     "hyphens preserved",
+			input:    "Step-by-Step Guide",
+			expected: "step-by-step_guide",
+		},
+		{
+			name:     "underscores preserved",
+			input:    "file_name example",
+			expected: "file_name_example",
+		},
+		{
+			name:     "dots preserved",
+			input:    "v1.2.3 Release",
+			expected: "v1.2.3_release",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := generateFileNameFromTitle(tt.input)
+			if result != tt.expected {
+				t.Errorf("generateFileNameFromTitle(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}

@@ -61,3 +61,30 @@ func (g *GuardianScraper) ScrapeArticle(url string) (string, error) {
 
 	return markdown, nil
 }
+
+func (g *GuardianScraper) ScrapeTitle(url string) (string, error) {
+	c := colly.NewCollector()
+
+	var title string
+
+	// title
+	c.OnHTML("h1", func(e *colly.HTMLElement) {
+		title = strings.TrimSpace(e.Text)
+	})
+
+	err := c.Visit(url)
+	if err != nil {
+		return "", err
+	}
+
+	return title, nil
+}
+
+func (g *GuardianScraper) ScrapeFilename(url string) (string, error) {
+	title, err := g.ScrapeTitle(url)
+	if err != nil {
+		return "", err
+	}
+
+	return generateFileNameFromTitle(title), nil
+}

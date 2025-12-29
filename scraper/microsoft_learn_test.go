@@ -506,3 +506,534 @@ func TestMicrosoftLearnScraper_ScrapeArticle_NoH1(t *testing.T) {
 		t.Error("should not have h1 when no h1 in HTML")
 	}
 }
+
+func TestMicrosoftLearnScraper_ScrapeTitle_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Microsoft Learn Article Title</h1>
+	<div class="content"></div>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Microsoft Learn Article Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>   Title With Whitespace   </h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Whitespace"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_WithNewlines(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>
+		Title With Newlines
+	</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Newlines"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_NoH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h2>Only H2</h2>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When no h1 exists, title should be empty
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_MultipleH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>First Title</h1>
+	<h1>Second Title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When multiple h1 exist, the last one overwrites previous ones
+	expected := "Second Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_EmptyH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_InvalidURL(t *testing.T) {
+	scraper := &MicrosoftLearnScraper{}
+	_, err := scraper.ScrapeTitle("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_SpecialCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Title with &amp; special &lt;characters&gt;</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// HTML entities should be decoded
+	expected := "Title with & special <characters>"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_WithNestedElements(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1><span>Nested</span> <strong>Title</strong></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Text from nested elements should be extracted
+	expected := "Nested Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeTitle_UnicodeCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Azure 入門ガイド</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Azure 入門ガイド"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Getting Started with Azure</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "getting_started_with_azure"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_ConvertsToLowercase(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Azure Documentation TITLE</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "azure_documentation_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_ReplacesSpacesWithUnderscores(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>multiple words in title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "multiple_words_in_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_ReplacesDoubleUnderscores(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Title  With  Double  Spaces</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Double spaces become double underscores, then single underscores
+	expected := "title_with_double_spaces"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_EmptyTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Empty title should produce empty filename
+	if result != "" {
+		t.Errorf("ScrapeFilename() = %q, want empty string", result)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_NoH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h2>Only H2</h2>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// No h1 means empty title, which produces empty filename
+	if result != "" {
+		t.Errorf("ScrapeFilename() = %q, want empty string", result)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_InvalidURL(t *testing.T) {
+	scraper := &MicrosoftLearnScraper{}
+	_, err := scraper.ScrapeFilename("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_SingleWord(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Overview</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "overview"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_PreservesSpecialCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Azure SDK 2.0 Release Notes</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Numbers and dots are preserved
+	expected := "azure_sdk_2.0_release_notes"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestMicrosoftLearnScraper_ScrapeFilename_UnicodeCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Azure 入門ガイド</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &MicrosoftLearnScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Unicode characters are preserved (just lowercased)
+	expected := "azure_入門ガイド"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}

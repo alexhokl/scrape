@@ -792,3 +792,534 @@ func TestGoDocScraper_ScrapeArticle_PreWithoutCode(t *testing.T) {
 		t.Errorf("expected 2 code block markers for pre, got: %q", result)
 	}
 }
+
+func TestGoDocScraper_ScrapeTitle_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Go Documentation Title</h1>
+	<article></article>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Go Documentation Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>   Title With Whitespace   </h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Whitespace"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_WithNewlines(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>
+		Title With Newlines
+	</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Newlines"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_NoH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h2>Only H2</h2>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When no h1 exists, title should be empty
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_MultipleH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>First Title</h1>
+	<h1>Second Title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When multiple h1 exist, the last one overwrites previous ones
+	expected := "Second Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_EmptyH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_InvalidURL(t *testing.T) {
+	scraper := &GoDocScraper{}
+	_, err := scraper.ScrapeTitle("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_SpecialCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Title with &amp; special &lt;characters&gt;</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// HTML entities should be decoded
+	expected := "Title with & special <characters>"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_WithNestedElements(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1><span>Nested</span> <strong>Title</strong></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Text from nested elements should be extracted
+	expected := "Nested Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeTitle_UnicodeCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Go 言語入門</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Go 言語入門"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Getting Started with Go</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "getting_started_with_go"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_ConvertsToLowercase(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Go Documentation TITLE</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "go_documentation_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_ReplacesSpacesWithUnderscores(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>multiple words in title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "multiple_words_in_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_ReplacesDoubleUnderscores(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Title  With  Double  Spaces</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Double spaces become double underscores, then single underscores
+	expected := "title_with_double_spaces"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_EmptyTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Empty title should produce empty filename
+	if result != "" {
+		t.Errorf("ScrapeFilename() = %q, want empty string", result)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_NoH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h2>Only H2</h2>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// No h1 means empty title, which produces empty filename
+	if result != "" {
+		t.Errorf("ScrapeFilename() = %q, want empty string", result)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_InvalidURL(t *testing.T) {
+	scraper := &GoDocScraper{}
+	_, err := scraper.ScrapeFilename("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_SingleWord(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Introduction</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "introduction"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_PreservesSpecialCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Go 1.21 Release Notes</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Numbers and dots are preserved
+	expected := "go_1.21_release_notes"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestGoDocScraper_ScrapeFilename_UnicodeCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Go 言語入門</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &GoDocScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Unicode characters are preserved (just lowercased)
+	expected := "go_言語入門"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}

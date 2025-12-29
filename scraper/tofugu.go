@@ -51,6 +51,87 @@ func (g *TofuguScraper) ScrapeArticle(url string) (string, error) {
 	return markdown, nil
 }
 
+func (g *TofuguScraper) ScrapeTitle(url string) (string, error) {
+	c := colly.NewCollector()
+
+	var title string
+
+	// title
+	c.OnHTML("h1.article-title", func(e *colly.HTMLElement) {
+		title = trimSpacesAndLineBreaks(e.Text)
+	})
+
+	err := c.Visit(url)
+	if err != nil {
+		return "", err
+	}
+
+	return title, nil
+}
+
+func (g *TofuguScraper) ScrapeFilename(url string) (string, error) {
+	scrapedTitle, err := g.ScrapeTitle(url)
+	if err != nil {
+		return "", err
+	}
+
+	// remove 〜 in title
+	title := strings.ReplaceAll(scrapedTitle, "〜", "")
+
+	// replace space with underscore in title
+	outputFilename := strings.ReplaceAll(title, " ", "_")
+
+	// replace forbidden characters in filename
+	outputFilename = strings.ReplaceAll(outputFilename, "/", "-")
+
+	// remove brackets in filename
+	outputFilename = strings.ReplaceAll(outputFilename, "(", "")
+	outputFilename = strings.ReplaceAll(outputFilename, ")", "")
+
+	// remove unicode characters except alphanumeric, underscore, hyphen, dot
+	outputFilename = removeNonFilenameChars(outputFilename)
+
+	// replace uppercase to lowercase
+	outputFilename = strings.ToLower(outputFilename)
+
+	// ensure filename does not start with underscore
+	outputFilename = strings.TrimPrefix(outputFilename, "_")
+
+	if outputFilename != "" {
+		return outputFilename, nil
+	}
+
+	return getBasenameFromURL(url), nil
+}
+
+func removeNonFilenameChars(s string) string {
+	builder := strings.Builder{}
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') ||
+			(r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') ||
+			r == '_' || r == '-' || r == '.' {
+			builder.WriteRune(r)
+		}
+	}
+	return builder.String()
+}
+
+func getBasenameFromURL(url string) string {
+	parts := strings.Split(url, "/")
+	if len(parts) == 0 {
+		return "article"
+	}
+	lastPart := parts[len(parts)-1]
+	if lastPart == "" && len(parts) > 1 {
+		lastPart = parts[len(parts)-2]
+	}
+	if lastPart == "" {
+		return "article"
+	}
+	return lastPart
+}
+
 func parseTofuguTitle(e *colly.HTMLElement) string {
 	builder := strings.Builder{}
 	builder.WriteString("# ")
@@ -99,7 +180,7 @@ func parseTofuguArticle(e *colly.HTMLElement) string {
 
 			case "ol":
 				child.ForEach("li", func(index int, li *colly.HTMLElement) {
-					builder.WriteString(fmt.Sprintf("%d. ", index+1))
+					fmt.Fprintf(&builder, "%d. ", index+1)
 					builder.WriteString(trimSpacesAndLineBreaks(li.Text))
 					builder.WriteString("\n")
 				})

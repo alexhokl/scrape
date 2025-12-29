@@ -41,8 +41,6 @@ func validateArticleOptions(_ *cobra.Command, _ []string) error {
 
 	switch opts.format {
 	case "markdown":
-		break
-
 	default:
 		return fmt.Errorf("invalid format: %s", opts.format)
 	}

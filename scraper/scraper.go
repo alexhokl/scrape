@@ -10,4 +10,6 @@ type ArticleScraper interface {
 	// ScrapeArticle scrapes the article content from the specified URL
 	// and returns markdown in a string
 	ScrapeArticle(url string) (string, error)
+	ScrapeTitle(url string) (string, error)
+	ScrapeFilename(url string) (string, error)
 }

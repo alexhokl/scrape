@@ -1004,3 +1004,1245 @@ func TestTofuguScraper_ScrapeArticle_WhitespaceHandling(t *testing.T) {
 		t.Errorf("expected trimmed title, got: %q", result)
 	}
 }
+
+func TestTofuguScraper_ScrapeTitle_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Tofugu Article Title</h1>
+	<article><div class="main"></div></article>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Tofugu Article Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">   Title With Whitespace   </h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Whitespace"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_WithNewlines(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1 class="article-title">
+Title With Newlines
+</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "Title With Newlines"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_NoArticleTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Regular H1 Without Class</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When no h1.article-title exists, title should be empty
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_MultipleH1ArticleTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">First Title</h1>
+	<h1 class="article-title">Second Title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// When multiple h1.article-title exist, the last one overwrites previous ones
+	expected := "Second Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_EmptyH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title"></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "" {
+		t.Errorf("ScrapeTitle() = %q, want empty string", result)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_InvalidURL(t *testing.T) {
+	scraper := &TofuguScraper{}
+	_, err := scraper.ScrapeTitle("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_SpecialCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title with &amp; special &lt;characters&gt;</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// HTML entities should be decoded
+	expected := "Title with & special <characters>"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_WithNestedElements(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title"><span>Nested</span> <strong>Title</strong></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Text from nested elements should be extracted
+	expected := "Nested Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_JapaneseCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">日本語の文法ガイド</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "日本語の文法ガイド"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_WithTildeCharacter(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">〜から〜まで: From 〜 To 〜</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// ScrapeTitle should preserve the tilde character (〜)
+	// Note: ScrapeFilename removes it, but ScrapeTitle should keep it
+	expected := "〜から〜まで: From 〜 To 〜"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeTitle_IgnoresRegularH1(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Regular H1</h1>
+	<h1 class="article-title">Article Title</h1>
+	<h1 class="other-class">Other H1</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeTitle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should only capture h1.article-title, not regular h1 or h1 with other classes
+	expected := "Article Title"
+	if result != expected {
+		t.Errorf("ScrapeTitle() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_Basic(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Japanese Grammar Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "japanese_grammar_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_ConvertsToLowercase(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">LEARN JAPANESE NOW</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "learn_japanese_now"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_RemovesTilde(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">〜から〜まで From To</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Japanese tilde 〜 should be removed
+	expected := "from_to"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_ReplacesSlashWithHyphen(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">This/That Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Slash should be replaced with hyphen
+	expected := "this-that_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_RemovesParentheses(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Guide (Complete Edition)</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Parentheses should be removed
+	expected := "guide_complete_edition"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_RemovesJapaneseCharacters(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">日本語 Japanese Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Japanese characters should be removed, only ASCII alphanumeric remains
+	expected := "japanese_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_RemovesLeadingUnderscore(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">日本語 Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Leading underscore (from removed Japanese chars + space) should be trimmed
+	expected := "guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_PreservesNumbersAndDots(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Version 2.0 Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Numbers and dots should be preserved
+	expected := "version_2.0_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_PreservesHyphens(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Step-by-Step Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Hyphens should be preserved
+	expected := "step-by-step_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_ComplexTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">〜てから (After Doing) - Grammar Guide</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// 〜 removed, てから removed (Japanese), parentheses removed, - preserved
+	expected := "after_doing_-_grammar_guide"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_SingleWord(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Hiragana</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "hiragana"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+// Tests for removeNonFilenameChars helper function
+
+func TestRemoveNonFilenameChars(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "only alphanumeric",
+			input:    "HelloWorld123",
+			expected: "HelloWorld123",
+		},
+		{
+			name:     "with underscores",
+			input:    "hello_world",
+			expected: "hello_world",
+		},
+		{
+			name:     "with hyphens",
+			input:    "hello-world",
+			expected: "hello-world",
+		},
+		{
+			name:     "with dots",
+			input:    "file.txt",
+			expected: "file.txt",
+		},
+		{
+			name:     "removes japanese characters",
+			input:    "hello日本語world",
+			expected: "helloworld",
+		},
+		{
+			name:     "removes tilde",
+			input:    "hello〜world",
+			expected: "helloworld",
+		},
+		{
+			name:     "removes parentheses",
+			input:    "hello(world)",
+			expected: "helloworld",
+		},
+		{
+			name:     "removes spaces",
+			input:    "hello world",
+			expected: "helloworld",
+		},
+		{
+			name:     "removes special characters",
+			input:    "hello@#$%world",
+			expected: "helloworld",
+		},
+		{
+			name:     "removes colons",
+			input:    "title: subtitle",
+			expected: "titlesubtitle",
+		},
+		{
+			name:     "removes slashes",
+			input:    "path/to/file",
+			expected: "pathtofile",
+		},
+		{
+			name:     "mixed allowed characters",
+			input:    "hello_world-test.txt",
+			expected: "hello_world-test.txt",
+		},
+		{
+			name:     "only japanese characters",
+			input:    "日本語のみ",
+			expected: "",
+		},
+		{
+			name:     "preserves uppercase",
+			input:    "HelloWorld",
+			expected: "HelloWorld",
+		},
+		{
+			name:     "complex mix",
+			input:    "〜てから (After) - Guide_v1.0",
+			expected: "After-Guide_v1.0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := removeNonFilenameChars(tt.input)
+			if result != tt.expected {
+				t.Errorf("removeNonFilenameChars(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// Tests for getBasenameFromURL helper function
+
+func TestGetBasenameFromURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "article",
+		},
+		{
+			name:     "simple URL",
+			input:    "https://example.com/article-name",
+			expected: "article-name",
+		},
+		{
+			name:     "URL with trailing slash",
+			input:    "https://example.com/article-name/",
+			expected: "article-name",
+		},
+		{
+			name:     "URL with multiple path segments",
+			input:    "https://example.com/blog/2024/my-article",
+			expected: "my-article",
+		},
+		{
+			name:     "URL with query string",
+			input:    "https://example.com/article?id=123",
+			expected: "article?id=123",
+		},
+		{
+			name:     "URL with file extension",
+			input:    "https://example.com/document.html",
+			expected: "document.html",
+		},
+		{
+			name:     "root URL only",
+			input:    "https://example.com/",
+			expected: "example.com",
+		},
+		{
+			name:     "URL without scheme",
+			input:    "example.com/article",
+			expected: "article",
+		},
+		{
+			name:     "single path segment",
+			input:    "article",
+			expected: "article",
+		},
+		{
+			name:     "multiple trailing slashes collapse",
+			input:    "https://example.com/article//",
+			expected: "article",
+		},
+		{
+			name:     "deep nested path",
+			input:    "https://example.com/a/b/c/d/e/last-segment",
+			expected: "last-segment",
+		},
+		{
+			name:     "URL with Japanese characters",
+			input:    "https://example.com/日本語記事",
+			expected: "日本語記事",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := getBasenameFromURL(tt.input)
+			if result != tt.expected {
+				t.Errorf("getBasenameFromURL(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// Additional tests for TofuguScraper.ScrapeFilename edge cases
+
+func TestTofuguScraper_ScrapeFilename_InvalidURL(t *testing.T) {
+	scraper := &TofuguScraper{}
+	_, err := scraper.ScrapeFilename("http://invalid.localhost.test:99999/nonexistent")
+
+	if err == nil {
+		t.Error("expected error for invalid URL, got nil")
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_EmptyTitleFallsBackToURL(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title"></h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL + "/my-article-path")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Empty title should fall back to URL basename
+	expected := "my-article-path"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_OnlyJapaneseCharactersFallsBackToURL(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">日本語のみ</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL + "/fallback-name")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Title with only Japanese chars becomes empty, should fall back to URL basename
+	expected := "fallback-name"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_MultipleSpaces(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title   With   Multiple   Spaces</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Multiple spaces become multiple underscores
+	expected := "title___with___multiple___spaces"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_MultipleSlashes(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Either/Or/Both</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Multiple slashes become multiple hyphens
+	expected := "either-or-both"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_NestedParentheses(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Guide (With (Nested) Parens)</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// All parentheses removed
+	expected := "guide_with_nested_parens"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_MultipleTildes(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">〜から〜まで〜</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL + "/kara-made")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// All tildes and Japanese chars removed, falls back to URL
+	expected := "kara-made"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_MixedCasePreservedThenLowercased(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">CamelCase And UPPERCASE</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// All characters converted to lowercase
+	expected := "camelcase_and_uppercase"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_SpecialCharactersRemoved(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title: With @Special# Characters!</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Special characters like : @ # ! are removed
+	expected := "title_with_special_characters"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_NoArticleTitleFallsBackToURL(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1>Regular H1 Without Class</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL + "/url-fallback")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// No h1.article-title means empty title, falls back to URL basename
+	expected := "url-fallback"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_OnlySpecialCharactersFallsBackToURL(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">@#$%^&*!</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL + "/special-chars-fallback")
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Title with only special chars becomes empty, falls back to URL basename
+	expected := "special-chars-fallback"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_LeadingSpaceBecomesLeadingUnderscore(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title"> Leading Space Title</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Note: trimSpacesAndLineBreaks is called during ScrapeTitle,
+	// so leading space should be trimmed before filename processing
+	expected := "leading_space_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_TrailingSpace(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Trailing Space Title </h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Trailing space should be trimmed during ScrapeTitle
+	expected := "trailing_space_title"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_NumericOnlyTitle(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">12345</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Numeric titles should be preserved
+	expected := "12345"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
+
+func TestTofuguScraper_ScrapeFilename_WithQuestionAndAmpersand(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">What? Why & How</h1>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeFilename(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// ? and & are removed, spaces around & become underscores (two consecutive)
+	expected := "what_why__how"
+	if result != expected {
+		t.Errorf("ScrapeFilename() = %q, want %q", result, expected)
+	}
+}
