@@ -25,6 +25,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &GoDocScraper{}, nil
 	case "tofugu":
 		return &TofuguScraper{}, nil
+	case "newyorktimes":
+		return &NewYorkTimesScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
