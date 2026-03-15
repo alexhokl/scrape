@@ -42,6 +42,7 @@ func validateFilenameOptions(_ *cobra.Command, _ []string) error {
 	case "microsoft":
 	case "go":
 	case "tofugu":
+	case "cloudflare":
 
 	default:
 		return fmt.Errorf("invalid source: %s", opts.source)

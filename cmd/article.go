@@ -52,6 +52,7 @@ func validateArticleOptions(_ *cobra.Command, _ []string) error {
 	case "tofugu":
 	case "newyorktimes":
 	case "tailscale":
+	case "cloudflare":
 
 	default:
 		return fmt.Errorf("invalid source: %s", opts.source)

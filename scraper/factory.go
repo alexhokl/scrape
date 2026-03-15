@@ -29,6 +29,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &NewYorkTimesScraper{}, nil
 	case "tailscale":
 		return &TailscaleScraper{}, nil
+	case "cloudflare":
+		return &CloudflareScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
