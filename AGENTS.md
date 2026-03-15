@@ -23,6 +23,8 @@ scraper/             # Scraper interfaces, implementations, and utilities
   tailscale.go       # TailscaleScraper implementation
   tofugu.go          # TofuguScraper implementation
   cloudflare.go      # CloudflareScraper implementation
+  wikipedia.go       # WikipediaScraper implementation
+  ollama.go          # OllamaScraper implementation
   util.go            # Shared utility functions
 ```
 
@@ -118,7 +120,7 @@ task sec
   (`articleOpts`, `linksOpts`, `titleOpts`, `filenameOpts`).
 - **Cobra commands**: camelCase with `Cmd` suffix (`articleCmd`, `linksCmd`).
 - **Source type strings**: all lowercase (`"guardian"`, `"microsoft"`, `"go"`,
-  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`). Case-sensitive by design.
+  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`). Case-sensitive by design.
 
 ### Error Handling
 

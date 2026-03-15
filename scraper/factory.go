@@ -31,6 +31,12 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &TailscaleScraper{}, nil
 	case "cloudflare":
 		return &CloudflareScraper{}, nil
+	case "wikipedia":
+		return &WikipediaScraper{}, nil
+	case "ollama":
+		return &OllamaScraper{}, nil
+	case "grafana":
+		return &GrafanaScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
