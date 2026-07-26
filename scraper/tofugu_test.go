@@ -383,10 +383,11 @@ func TestTofuguScraper_ScrapeArticle_ExampleSentence(t *testing.T) {
 	<h1 class="article-title">Title</h1>
 	<article>
 		<div class="main">
-			<ul class="example-sentence">
-				<li>日本語の文</li>
-				<li>English translation</li>
-			</ul>
+			<div class="article-audio-sentence"><ul>
+				<li class="article-audio-sentence-player"><button type="button" title="Click to play audio"></button><audio preload="none"><source src="https://example.com/audio.mp3" type="audio/mpeg" /></audio></li>
+				<li class="article-audio-sentence-sentence">日本語の文</li>
+				<li class="article-audio-sentence-sentence">English translation</li>
+			</ul></div>
 		</div>
 	</article>
 </body>
@@ -419,6 +420,140 @@ func TestTofuguScraper_ScrapeArticle_ExampleSentence(t *testing.T) {
 	}
 	if !strings.Contains(result, "English translation") {
 		t.Error("expected English text")
+	}
+	// Player element text should not leak into output
+	if strings.Contains(result, "Click to play audio") {
+		t.Error("player button text should not be present in output")
+	}
+	if strings.Contains(result, "audio") {
+		t.Error("audio element text should not be present in output")
+	}
+}
+
+func TestTofuguScraper_ScrapeArticle_AudioSentence_Poem(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title</h1>
+	<article>
+		<div class="main">
+			<div class="article-audio-sentence"><ul>
+				<li class="article-audio-sentence-player"><button type="button" title="Click to play audio"></button><audio preload="none"><source src="https://files.tofugu.com/articles/japanese/2017-03-21-japanese-particle-monono/01.mp3" type="audio/mpeg" /><source src="https://files.tofugu.com/articles/japanese/2017-03-21-japanese-particle-monono/01.ogg" type="audio/ogg" /></audio></li>
+				<li class="article-audio-sentence-sentence">君来むと言ひし夜ごとに過ぎぬれば頼まぬものの恋ひつつぞふる。</li>
+				<li class="article-audio-sentence-sentence">Every single night in which you said you would come ended up passing in vain. I no longer trust you, yet still spend my time longing for you.</li>
+			</ul></div>
+		</div>
+	</article>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeArticle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(result, "Example") {
+		t.Error("expected 'Example' label")
+	}
+	if !strings.Contains(result, "- Japanese:") {
+		t.Error("expected Japanese label")
+	}
+	if !strings.Contains(result, "- English:") {
+		t.Error("expected English label")
+	}
+	if !strings.Contains(result, "君来むと言ひし夜ごとに過ぎぬれば頼まぬものの恋ひつつぞふる。") {
+		t.Error("expected Japanese poem text")
+	}
+	if !strings.Contains(result, "Every single night in which you said you would come ended up passing in vain. I no longer trust you, yet still spend my time longing for you.") {
+		t.Error("expected English translation of poem")
+	}
+	// Player element text should not leak into output
+	if strings.Contains(result, "Click to play audio") {
+		t.Error("player button text should not be present in output")
+	}
+}
+
+func TestTofuguScraper_ScrapeArticle_DefinitionList(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title</h1>
+	<article>
+		<div class="main">
+			<dl class="highlight-right">
+				<dt>ものの</dt>
+				<dd>but; although</dd>
+			</dl>
+		</div>
+	</article>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeArticle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(result, "**ものの** — but; although") {
+		t.Errorf("expected definition list pair, got: %q", result)
+	}
+}
+
+func TestTofuguScraper_ScrapeArticle_DefinitionList_MultiplePairs(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 class="article-title">Title</h1>
+	<article>
+		<div class="main">
+			<dl class="highlight-left">
+				<dt>けれども</dt>
+				<dd>but; however</dd>
+				<dt>が</dt>
+				<dd>but</dd>
+			</dl>
+		</div>
+	</article>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TofuguScraper{}
+	result, err := scraper.ScrapeArticle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(result, "**けれども** — but; however") {
+		t.Errorf("expected first definition pair, got: %q", result)
+	}
+	if !strings.Contains(result, "**が** — but") {
+		t.Errorf("expected second definition pair, got: %q", result)
 	}
 }
 
@@ -832,15 +967,20 @@ func TestTofuguScraper_ScrapeArticle_MixedContent(t *testing.T) {
 			<h2>Introduction</h2>
 			<p>Welcome to Japanese grammar.</p>
 			<h3>Prerequisites</h3>
-			<ol>
-				<li>Basic hiragana</li>
-				<li>Basic katakana</li>
-			</ol>
-			<ul class="example-sentence">
-				<li>これは本です</li>
-				<li>This is a book</li>
-			</ul>
-			<table>
+		<ol>
+			<li>Basic hiragana</li>
+			<li>Basic katakana</li>
+		</ol>
+		<dl class="highlight-right">
+			<dt>ものの</dt>
+			<dd>but; although</dd>
+		</dl>
+		<div class="article-audio-sentence"><ul>
+			<li class="article-audio-sentence-player"><button type="button" title="Click to play audio"></button><audio preload="none"><source src="https://example.com/audio.mp3" type="audio/mpeg" /></audio></li>
+			<li class="article-audio-sentence-sentence">これは本です</li>
+			<li class="article-audio-sentence-sentence">This is a book</li>
+		</ul></div>
+		<table>
 				<tr><th>Particle</th><th>Usage</th></tr>
 				<tr><td>は</td><td>Topic marker</td></tr>
 			</table>
@@ -873,6 +1013,7 @@ func TestTofuguScraper_ScrapeArticle_MixedContent(t *testing.T) {
 		{"Welcome to Japanese grammar.", "paragraph content"},
 		{"### Prerequisites", "h3 heading"},
 		{"1. Basic hiragana", "ordered list item"},
+		{"**ものの** — but; although", "definition list pair"},
 		{"Example", "example label"},
 		{"- Japanese:", "Japanese label"},
 		{"これは本です", "Japanese example sentence"},

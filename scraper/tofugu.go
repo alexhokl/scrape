@@ -169,16 +169,26 @@ func parseTofuguArticle(e *colly.HTMLElement) string {
 			case "p":
 				builder.WriteString(removeExtraSpaces(child.Text))
 				builder.WriteString("\n\n")
-			case "ul":
-				if child.DOM.HasClass("example-sentence") {
-					builder.WriteString(parseExampleList(child))
-					break
-				}
+		case "ul":
+			if child.DOM.HasClass("example-sentence") {
+				builder.WriteString(parseExampleList(child))
+				break
+			}
 
-				// assume it is table of contents
-				builder.WriteString(parseTableOfContents(child))
+			// assume it is table of contents
+			builder.WriteString(parseTableOfContents(child))
 
-			case "ol":
+		case "div":
+			if child.DOM.HasClass("article-audio-sentence") {
+				builder.WriteString(parseAudioSentenceList(child))
+			}
+
+		case "dl":
+			if child.DOM.HasClass("highlight-right") || child.DOM.HasClass("highlight-left") {
+				builder.WriteString(parseTofuguDefinitionList(child))
+			}
+
+		case "ol":
 				child.ForEach("li", func(index int, li *colly.HTMLElement) {
 					fmt.Fprintf(&builder, "%d. ", index+1)
 					builder.WriteString(trimSpacesAndLineBreaks(li.Text))
@@ -247,6 +257,39 @@ func parseExampleList(e *colly.HTMLElement) string {
 	})
 	builder.WriteString("\n")
 
+	return builder.String()
+}
+
+func parseAudioSentenceList(e *colly.HTMLElement) string {
+	builder := strings.Builder{}
+	builder.WriteString("Example\n\n")
+	index := 0
+	e.ForEach("li.article-audio-sentence-sentence", func(_ int, li *colly.HTMLElement) {
+		switch index {
+		case 0:
+			builder.WriteString("- Japanese:\n")
+		case 1:
+			builder.WriteString("- English:\n")
+		}
+		sentence := fmt.Sprintf("  * %s\n", trimSpacesAndLineBreaks(li.Text))
+		builder.WriteString(sentence)
+		builder.WriteString("\n")
+		index++
+	})
+	builder.WriteString("\n")
+
+	return builder.String()
+}
+
+func parseTofuguDefinitionList(e *colly.HTMLElement) string {
+	builder := strings.Builder{}
+	e.ForEach("dt", func(_ int, dt *colly.HTMLElement) {
+		dd := dt.DOM.Next()
+		if dd.Length() == 0 {
+			return
+		}
+		fmt.Fprintf(&builder, "**%s** — %s\n\n", trimSpacesAndLineBreaks(dt.Text), trimSpacesAndLineBreaks(dd.Text()))
+	})
 	return builder.String()
 }
 
