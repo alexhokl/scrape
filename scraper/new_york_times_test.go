@@ -18,7 +18,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_Title(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -51,7 +51,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_FullArticle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -91,7 +91,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_BodyParagraphs(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -131,7 +131,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_OnlyBodyContent(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -165,7 +165,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_EmptyContent(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -204,7 +204,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_NoTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -236,7 +236,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_MultipleH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -270,7 +270,7 @@ func TestNewYorkTimesScraper_ScrapeArticle_ContentOrder(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -306,7 +306,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_Basic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -334,7 +334,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -364,7 +364,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_WithNewlines(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -392,7 +392,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_NoH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -421,7 +421,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_MultipleH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -450,7 +450,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_EmptyH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -486,7 +486,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_SpecialCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -515,7 +515,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_WithNestedElements(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -544,7 +544,7 @@ func TestNewYorkTimesScraper_ScrapeTitle_UnicodeCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -572,7 +572,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_Basic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -600,7 +600,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_ConvertsToLowercase(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -628,7 +628,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_ReplacesSpacesWithUnderscores(t *tes
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -656,7 +656,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_ReplacesDoubleUnderscores(t *testing
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -685,7 +685,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_EmptyTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -713,7 +713,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_NoH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -750,7 +750,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_SingleWord(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -778,7 +778,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_PreservesSpecialCharacters(t *testin
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -807,7 +807,7 @@ func TestNewYorkTimesScraper_ScrapeFilename_UnicodeCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 

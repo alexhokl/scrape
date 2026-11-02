@@ -68,15 +68,15 @@ func parseTailscaleContent(e *colly.HTMLElement) string {
 
 		switch child.Name {
 		case "h2":
-			builder.WriteString(fmt.Sprintf("## %s\n\n", parseTailscaleHeading(child)))
+			fmt.Fprintf(&builder, "## %s\n\n", parseTailscaleHeading(child))
 		case "h3":
-			builder.WriteString(fmt.Sprintf("### %s\n\n", parseTailscaleHeading(child)))
+			fmt.Fprintf(&builder, "### %s\n\n", parseTailscaleHeading(child))
 		case "h4":
-			builder.WriteString(fmt.Sprintf("#### %s\n\n", parseTailscaleHeading(child)))
+			fmt.Fprintf(&builder, "#### %s\n\n", parseTailscaleHeading(child))
 		case "p":
 			text := strings.TrimSpace(parseTailscaleInline(child))
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("%s\n\n", text))
+				fmt.Fprintf(&builder, "%s\n\n", text)
 			}
 		case "ul":
 			builder.WriteString(parseTailscaleList(child, false))
@@ -92,7 +92,7 @@ func parseTailscaleContent(e *colly.HTMLElement) string {
 					case "p":
 						text := strings.TrimSpace(parseTailscaleInline(noteChild))
 						if text != "" {
-							builder.WriteString(fmt.Sprintf("> %s\n\n", text))
+							fmt.Fprintf(&builder, "> %s\n\n", text)
 						}
 					case "div":
 						if noteChild.DOM.HasClass("group") && noteChild.DOM.HasClass("relative") && noteChild.DOM.HasClass("overflow-hidden") {
@@ -132,9 +132,9 @@ func parseTailscaleCodeBlock(e *colly.HTMLElement) string {
 	lang := parseTailscaleCodeLang(pre)
 	code := strings.TrimRight(pre.Text, "\n")
 	if lang != "" {
-		builder.WriteString(fmt.Sprintf("```%s\n%s\n```\n\n", lang, code))
+		fmt.Fprintf(&builder, "```%s\n%s\n```\n\n", lang, code)
 	} else {
-		builder.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+		fmt.Fprintf(&builder, "```\n%s\n```\n\n", code)
 	}
 	return builder.String()
 }
@@ -186,9 +186,9 @@ func parseTailscaleList(e *colly.HTMLElement, ordered bool) string {
 		}
 
 		if ordered {
-			builder.WriteString(fmt.Sprintf("%d. %s\n", index, bulletText))
+			fmt.Fprintf(&builder, "%d. %s\n", index, bulletText)
 		} else {
-			builder.WriteString(fmt.Sprintf("* %s\n", bulletText))
+			fmt.Fprintf(&builder, "* %s\n", bulletText)
 		}
 
 		// Emit any code blocks that are direct children of this <li>.
@@ -230,12 +230,12 @@ func parseTailscaleInline(e *colly.HTMLElement) string {
 			sel := e.DOM.FindNodes(node)
 			switch node.Data {
 			case "code":
-				builder.WriteString(fmt.Sprintf("`%s`", sel.Text()))
+				fmt.Fprintf(&builder, "`%s`", sel.Text())
 			case "a":
 				href, _ := sel.Attr("href")
 				linkText := parseTailscaleInlineNodes(sel.Contents().Nodes)
 				if href != "" {
-					builder.WriteString(fmt.Sprintf("[%s](%s)", linkText, href))
+					fmt.Fprintf(&builder, "[%s](%s)", linkText, href)
 				} else {
 					builder.WriteString(linkText)
 				}
@@ -264,7 +264,7 @@ func parseTailscaleInlineNodes(nodes []*html.Node) string {
 						codeText.WriteString(c.Data)
 					}
 				}
-				builder.WriteString(fmt.Sprintf("`%s`", codeText.String()))
+				fmt.Fprintf(&builder, "`%s`", codeText.String())
 			} else {
 				// fallback: emit text content
 				for c := node.FirstChild; c != nil; c = c.NextSibling {

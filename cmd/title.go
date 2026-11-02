@@ -30,8 +30,8 @@ func init() {
 	flags.StringVar(&titleOpts.source, "source", "", "Source type (e.g., guardian, etc)")
 	flags.StringVarP(&titleOpts.url, "url", "u", "", "URL of the article to scrape")
 
-	titleCmd.MarkFlagRequired("source")
-	titleCmd.MarkFlagRequired("url")
+	cobra.CheckErr(titleCmd.MarkPersistentFlagRequired("source"))
+	cobra.CheckErr(titleCmd.MarkPersistentFlagRequired("url"))
 }
 
 func validateTitleOptions(_ *cobra.Command, _ []string) error {
@@ -69,7 +69,9 @@ func scrapeArticleTitle(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("error scraping title of article: %w", err)
 	}
-	fmt.Fprintln(os.Stdout, markdownStr)
+	if _, err := fmt.Fprintln(os.Stdout, markdownStr); err != nil {
+		return fmt.Errorf("error writing output: %w", err)
+	}
 
 	return nil
 }

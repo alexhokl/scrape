@@ -25,7 +25,7 @@ func TestWikipediaScraper_ScrapeArticle_Title(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -71,7 +71,7 @@ func TestWikipediaScraper_ScrapeArticle_Headings(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -113,7 +113,7 @@ func TestWikipediaScraper_ScrapeArticle_Paragraph(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -145,7 +145,7 @@ func TestWikipediaScraper_ScrapeArticle_BoldAndItalic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -180,7 +180,7 @@ func TestWikipediaScraper_ScrapeArticle_InternalLink(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -212,7 +212,7 @@ func TestWikipediaScraper_ScrapeArticle_ExternalLink(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -244,7 +244,7 @@ func TestWikipediaScraper_ScrapeArticle_InlineCode(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -276,7 +276,7 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesCitationSuperscripts(t *testing.
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -311,7 +311,7 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesCitationNeeded(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -350,7 +350,7 @@ func TestWikipediaScraper_ScrapeArticle_UnorderedList(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -391,7 +391,7 @@ func TestWikipediaScraper_ScrapeArticle_OrderedList(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -434,7 +434,7 @@ func TestWikipediaScraper_ScrapeArticle_SkipsReferencesSection(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -484,7 +484,7 @@ func TestWikipediaScraper_ScrapeArticle_SkipsSeeAlsoSection(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -536,7 +536,7 @@ func TestWikipediaScraper_ScrapeArticle_ContentAfterSkippedSectionResumes(t *tes
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -582,7 +582,7 @@ func TestWikipediaScraper_ScrapeArticle_Figure(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -615,7 +615,7 @@ func TestWikipediaScraper_ScrapeArticle_PreCodeBlock(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -647,7 +647,7 @@ func TestWikipediaScraper_ScrapeArticle_Blockquote(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -683,7 +683,7 @@ func TestWikipediaScraper_ScrapeArticle_Table(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -723,7 +723,7 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesNavigation(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -764,7 +764,7 @@ func TestWikipediaScraper_ScrapeArticle_ListWithLinks(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -830,7 +830,7 @@ func TestWikipediaScraper_ScrapeArticle_MixedContent(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -890,7 +890,7 @@ func TestWikipediaScraper_ScrapeTitle_Basic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -918,7 +918,7 @@ func TestWikipediaScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -946,7 +946,7 @@ func TestWikipediaScraper_ScrapeTitle_NoHeading(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1032,7 +1032,7 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesPortalBox(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1068,7 +1068,7 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesShortDescription(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1121,7 +1121,7 @@ func TestWikipediaScraper_ScrapeArticle_ParsoidSections(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 

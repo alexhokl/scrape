@@ -116,11 +116,11 @@ func parseGoDocParagraph(p *colly.HTMLElement) string {
 			if p.Name == "li" && child.Name == "ul" {
 				// list in list
 				child.ForEach("li", func(_ int, subListItem *colly.HTMLElement) {
-					builder.WriteString(fmt.Sprintf("  * %s\n", parseGoDocParagraph(subListItem)))
+					fmt.Fprintf(&builder, "  * %s\n", parseGoDocParagraph(subListItem))
 				})
 				return
 			}
-			builder.WriteString(fmt.Sprintf("**%s**", text))
+			fmt.Fprintf(&builder, "**%s**", text)
 		}
 	})
 

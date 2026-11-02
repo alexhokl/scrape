@@ -195,7 +195,7 @@ func TestTofuguScraper_ScrapeArticle_Title(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -230,7 +230,7 @@ func TestTofuguScraper_ScrapeArticle_TitleAndMeta(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -269,7 +269,7 @@ func TestTofuguScraper_ScrapeArticle_Headings(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -314,7 +314,7 @@ func TestTofuguScraper_ScrapeArticle_Paragraphs(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -353,7 +353,7 @@ func TestTofuguScraper_ScrapeArticle_OrderedList(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -395,7 +395,7 @@ func TestTofuguScraper_ScrapeArticle_ExampleSentence(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -450,7 +450,7 @@ func TestTofuguScraper_ScrapeArticle_AudioSentence_Poem(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -501,7 +501,7 @@ func TestTofuguScraper_ScrapeArticle_DefinitionList(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -538,7 +538,7 @@ func TestTofuguScraper_ScrapeArticle_DefinitionList_MultiplePairs(t *testing.T) 
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -577,7 +577,7 @@ func TestTofuguScraper_ScrapeArticle_TableOfContents(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -626,7 +626,7 @@ func TestTofuguScraper_ScrapeArticle_NestedTableOfContents(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -673,7 +673,7 @@ func TestTofuguScraper_ScrapeArticle_Table(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -726,7 +726,7 @@ func TestTofuguScraper_ScrapeArticle_TableWithoutHeaders(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -765,7 +765,7 @@ func TestTofuguScraper_ScrapeArticle_Blockquote(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -799,7 +799,7 @@ Line three</blockquote>
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -839,7 +839,7 @@ func TestTofuguScraper_ScrapeArticle_EmptyContent(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -872,7 +872,7 @@ func TestTofuguScraper_ScrapeArticle_NoTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -915,7 +915,7 @@ func TestTofuguScraper_ScrapeArticle_HeadingsOrder(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -992,7 +992,7 @@ func TestTofuguScraper_ScrapeArticle_MixedContent(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1050,7 +1050,7 @@ func TestTofuguScraper_ScrapeArticle_OnlyDirectChildren(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1096,7 +1096,7 @@ Line 2</td>
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1129,7 +1129,7 @@ func TestTofuguScraper_ScrapeArticle_WhitespaceHandling(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1158,7 +1158,7 @@ func TestTofuguScraper_ScrapeTitle_Basic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1186,7 +1186,7 @@ func TestTofuguScraper_ScrapeTitle_WithWhitespace(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1216,7 +1216,7 @@ Title With Newlines
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1244,7 +1244,7 @@ func TestTofuguScraper_ScrapeTitle_NoArticleTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1273,7 +1273,7 @@ func TestTofuguScraper_ScrapeTitle_MultipleH1ArticleTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1302,7 +1302,7 @@ func TestTofuguScraper_ScrapeTitle_EmptyH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1338,7 +1338,7 @@ func TestTofuguScraper_ScrapeTitle_SpecialCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1367,7 +1367,7 @@ func TestTofuguScraper_ScrapeTitle_WithNestedElements(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1396,7 +1396,7 @@ func TestTofuguScraper_ScrapeTitle_JapaneseCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1424,7 +1424,7 @@ func TestTofuguScraper_ScrapeTitle_WithTildeCharacter(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1456,7 +1456,7 @@ func TestTofuguScraper_ScrapeTitle_IgnoresRegularH1(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1485,7 +1485,7 @@ func TestTofuguScraper_ScrapeFilename_Basic(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1513,7 +1513,7 @@ func TestTofuguScraper_ScrapeFilename_ConvertsToLowercase(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1541,7 +1541,7 @@ func TestTofuguScraper_ScrapeFilename_RemovesTilde(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1570,7 +1570,7 @@ func TestTofuguScraper_ScrapeFilename_ReplacesSlashWithHyphen(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1599,7 +1599,7 @@ func TestTofuguScraper_ScrapeFilename_RemovesParentheses(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1628,7 +1628,7 @@ func TestTofuguScraper_ScrapeFilename_RemovesJapaneseCharacters(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1657,7 +1657,7 @@ func TestTofuguScraper_ScrapeFilename_RemovesLeadingUnderscore(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1686,7 +1686,7 @@ func TestTofuguScraper_ScrapeFilename_PreservesNumbersAndDots(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1715,7 +1715,7 @@ func TestTofuguScraper_ScrapeFilename_PreservesHyphens(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1744,7 +1744,7 @@ func TestTofuguScraper_ScrapeFilename_ComplexTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1773,7 +1773,7 @@ func TestTofuguScraper_ScrapeFilename_SingleWord(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -1992,7 +1992,7 @@ func TestTofuguScraper_ScrapeFilename_EmptyTitleFallsBackToURL(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2021,7 +2021,7 @@ func TestTofuguScraper_ScrapeFilename_OnlyJapaneseCharactersFallsBackToURL(t *te
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2050,7 +2050,7 @@ func TestTofuguScraper_ScrapeFilename_MultipleSpaces(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2079,7 +2079,7 @@ func TestTofuguScraper_ScrapeFilename_MultipleSlashes(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2108,7 +2108,7 @@ func TestTofuguScraper_ScrapeFilename_NestedParentheses(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2137,7 +2137,7 @@ func TestTofuguScraper_ScrapeFilename_MultipleTildes(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2166,7 +2166,7 @@ func TestTofuguScraper_ScrapeFilename_MixedCasePreservedThenLowercased(t *testin
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2195,7 +2195,7 @@ func TestTofuguScraper_ScrapeFilename_SpecialCharactersRemoved(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2224,7 +2224,7 @@ func TestTofuguScraper_ScrapeFilename_NoArticleTitleFallsBackToURL(t *testing.T)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2253,7 +2253,7 @@ func TestTofuguScraper_ScrapeFilename_OnlySpecialCharactersFallsBackToURL(t *tes
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2282,7 +2282,7 @@ func TestTofuguScraper_ScrapeFilename_LeadingSpaceBecomesLeadingUnderscore(t *te
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2312,7 +2312,7 @@ func TestTofuguScraper_ScrapeFilename_TrailingSpace(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2341,7 +2341,7 @@ func TestTofuguScraper_ScrapeFilename_NumericOnlyTitle(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 
@@ -2370,7 +2370,7 @@ func TestTofuguScraper_ScrapeFilename_WithQuestionAndAmpersand(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(html))
+		_, _ = w.Write([]byte(html))
 	}))
 	defer server.Close()
 

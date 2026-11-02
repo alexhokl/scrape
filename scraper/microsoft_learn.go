@@ -104,7 +104,7 @@ func parseMicrosoftParagraph(p *colly.HTMLElement) string {
 				return
 			}
 			// for other element nodes, we can just bold the text
-			builder.WriteString(fmt.Sprintf("**%s**", parseMicrosoftParagraph(child)))
+			fmt.Fprintf(&builder, "**%s**", parseMicrosoftParagraph(child))
 		}
 	})
 

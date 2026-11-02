@@ -70,11 +70,11 @@ func parseOllamaContent(e *colly.HTMLElement) string {
 
 		switch child.Name {
 		case "h2":
-			builder.WriteString(fmt.Sprintf("## %s\n\n", strings.TrimSpace(child.Text)))
+			fmt.Fprintf(&builder, "## %s\n\n", strings.TrimSpace(child.Text))
 		case "h3":
-			builder.WriteString(fmt.Sprintf("### %s\n\n", strings.TrimSpace(child.Text)))
+			fmt.Fprintf(&builder, "### %s\n\n", strings.TrimSpace(child.Text))
 		case "h4":
-			builder.WriteString(fmt.Sprintf("#### %s\n\n", strings.TrimSpace(child.Text)))
+			fmt.Fprintf(&builder, "#### %s\n\n", strings.TrimSpace(child.Text))
 		case "p":
 			// A <p> that contains only an <img> is rendered as an image block.
 			if isOllamaImageParagraph(child) {
@@ -82,14 +82,14 @@ func parseOllamaContent(e *colly.HTMLElement) string {
 					src := img.Attr("src")
 					alt := img.Attr("alt")
 					if src != "" {
-						builder.WriteString(fmt.Sprintf("![%s](%s)\n\n", alt, src))
+						fmt.Fprintf(&builder, "![%s](%s)\n\n", alt, src)
 					}
 				})
 				return
 			}
 			text := strings.TrimSpace(parseOllamaInline(child))
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("%s\n\n", text))
+				fmt.Fprintf(&builder, "%s\n\n", text)
 			}
 		case "ul":
 			builder.WriteString(parseOllamaList(child, false))
@@ -100,7 +100,7 @@ func parseOllamaContent(e *colly.HTMLElement) string {
 		case "blockquote":
 			text := strings.TrimSpace(child.Text)
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("> %s\n\n", text))
+				fmt.Fprintf(&builder, "> %s\n\n", text)
 			}
 		}
 	})
@@ -138,9 +138,9 @@ func parseOllamaCodeBlock(e *colly.HTMLElement) string {
 	})
 	code := strings.TrimRight(e.Text, "\n")
 	if lang != "" {
-		builder.WriteString(fmt.Sprintf("```%s\n%s\n```\n\n", lang, code))
+		fmt.Fprintf(&builder, "```%s\n%s\n```\n\n", lang, code)
 	} else {
-		builder.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+		fmt.Fprintf(&builder, "```\n%s\n```\n\n", code)
 	}
 	return builder.String()
 }
@@ -168,9 +168,9 @@ func parseOllamaList(e *colly.HTMLElement, ordered bool) string {
 		index++
 		text := strings.TrimSpace(parseOllamaInline(li))
 		if ordered {
-			builder.WriteString(fmt.Sprintf("%d. %s\n", index, text))
+			fmt.Fprintf(&builder, "%d. %s\n", index, text)
 		} else {
-			builder.WriteString(fmt.Sprintf("* %s\n", text))
+			fmt.Fprintf(&builder, "* %s\n", text)
 		}
 	})
 	builder.WriteString("\n")
@@ -190,13 +190,13 @@ func parseOllamaInline(e *colly.HTMLElement) string {
 			sel := e.DOM.FindNodes(node)
 			switch node.Data {
 			case "code":
-				builder.WriteString(fmt.Sprintf("`%s`", sel.Text()))
+				fmt.Fprintf(&builder, "`%s`", sel.Text())
 			case "a":
 				href, _ := sel.Attr("href")
 				linkText := parseOllamaInlineNodes(sel.Contents().Nodes)
 				linkText = strings.TrimSpace(linkText)
 				if href != "" && linkText != "" {
-					builder.WriteString(fmt.Sprintf("[%s](%s)", linkText, href))
+					fmt.Fprintf(&builder, "[%s](%s)", linkText, href)
 				} else {
 					builder.WriteString(linkText)
 				}
@@ -204,13 +204,13 @@ func parseOllamaInline(e *colly.HTMLElement) string {
 				text := parseOllamaInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("**%s**", trimmed))
+					fmt.Fprintf(&builder, "**%s**", trimmed)
 				}
 			case "i", "em":
 				text := parseOllamaInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("*%s*", trimmed))
+					fmt.Fprintf(&builder, "*%s*", trimmed)
 				}
 			default:
 				builder.WriteString(sel.Text())
@@ -237,7 +237,7 @@ func parseOllamaInlineNodes(nodes []*html.Node) string {
 						codeText.WriteString(c.Data)
 					}
 				}
-				builder.WriteString(fmt.Sprintf("`%s`", codeText.String()))
+				fmt.Fprintf(&builder, "`%s`", codeText.String())
 			default:
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					if c.Type == html.TextNode {

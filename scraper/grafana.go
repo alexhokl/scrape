@@ -72,15 +72,15 @@ func parseGrafanaContent(e *colly.HTMLElement) string {
 
 		switch child.Name {
 		case "h2":
-			builder.WriteString(fmt.Sprintf("## %s\n\n", parseGrafanaHeading(child)))
+			fmt.Fprintf(&builder, "## %s\n\n", parseGrafanaHeading(child))
 		case "h3":
-			builder.WriteString(fmt.Sprintf("### %s\n\n", parseGrafanaHeading(child)))
+			fmt.Fprintf(&builder, "### %s\n\n", parseGrafanaHeading(child))
 		case "h4":
-			builder.WriteString(fmt.Sprintf("#### %s\n\n", parseGrafanaHeading(child)))
+			fmt.Fprintf(&builder, "#### %s\n\n", parseGrafanaHeading(child))
 		case "p":
 			text := strings.TrimSpace(parseGrafanaInline(child))
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("%s\n\n", text))
+				fmt.Fprintf(&builder, "%s\n\n", text)
 			}
 		case "ul":
 			builder.WriteString(parseGrafanaList(child, false))
@@ -138,7 +138,7 @@ func parseGrafanaCodeBlock(e *colly.HTMLElement) string {
 		return ""
 	}
 	code := strings.TrimRight(pre.Text, "\n")
-	builder.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+	fmt.Fprintf(&builder, "```\n%s\n```\n\n", code)
 	return builder.String()
 }
 
@@ -169,9 +169,9 @@ func parseGrafanaList(e *colly.HTMLElement, ordered bool) string {
 		}
 
 		if ordered {
-			builder.WriteString(fmt.Sprintf("%d. %s\n", index, bulletText))
+			fmt.Fprintf(&builder, "%d. %s\n", index, bulletText)
 		} else {
-			builder.WriteString(fmt.Sprintf("* %s\n", bulletText))
+			fmt.Fprintf(&builder, "* %s\n", bulletText)
 		}
 	})
 	builder.WriteString("\n")
@@ -218,17 +218,17 @@ func parseGrafanaInline(e *colly.HTMLElement) string {
 			sel := e.DOM.FindNodes(node)
 			switch node.Data {
 			case "code":
-				builder.WriteString(fmt.Sprintf("`%s`", sel.Text()))
+				fmt.Fprintf(&builder, "`%s`", sel.Text())
 			case "a":
 				href, _ := sel.Attr("href")
 				linkText := parseGrafanaInlineNodes(sel.Contents().Nodes)
 				if href != "" {
-					builder.WriteString(fmt.Sprintf("[%s](%s)", linkText, href))
+					fmt.Fprintf(&builder, "[%s](%s)", linkText, href)
 				} else {
 					builder.WriteString(linkText)
 				}
 			case "strong":
-				builder.WriteString(fmt.Sprintf("**%s**", sel.Text()))
+				fmt.Fprintf(&builder, "**%s**", sel.Text())
 			default:
 				builder.WriteString(sel.Text())
 			}
@@ -252,7 +252,7 @@ func parseGrafanaInlineNodes(nodes []*html.Node) string {
 						codeText.WriteString(c.Data)
 					}
 				}
-				builder.WriteString(fmt.Sprintf("`%s`", codeText.String()))
+				fmt.Fprintf(&builder, "`%s`", codeText.String())
 			} else {
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
 					if c.Type == html.TextNode {

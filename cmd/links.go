@@ -30,8 +30,8 @@ func init() {
 	flags.StringVarP(&linksOpts.url, "url", "u", "", "URL of the links to scrape")
 	flags.StringVar(&linksOpts.source, "source", "", "Source type (e.g., guardian, etc)")
 
-	linksCmd.MarkFlagRequired("source")
-	linksCmd.MarkFlagRequired("url")
+	cobra.CheckErr(linksCmd.MarkPersistentFlagRequired("source"))
+	cobra.CheckErr(linksCmd.MarkPersistentFlagRequired("url"))
 }
 
 func validateLinksOptions(_ *cobra.Command, _ []string) error {
@@ -63,7 +63,9 @@ func scrapeLinks(_ *cobra.Command, args []string) error {
 	}
 
 	for linkText, articleURL := range links {
-		fmt.Fprintf(os.Stdout, "[%v](%v)\n", linkText, articleURL)
+		if _, err := fmt.Fprintf(os.Stdout, "[%v](%v)\n", linkText, articleURL); err != nil {
+			return fmt.Errorf("error writing output: %w", err)
+		}
 	}
 
 	return nil

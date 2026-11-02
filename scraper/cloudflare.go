@@ -78,18 +78,18 @@ func parseCloudflareContent(e *colly.HTMLElement) string {
 				child.ForEach("h2, h3, h4", func(_ int, heading *colly.HTMLElement) {
 					switch heading.Name {
 					case "h2":
-						builder.WriteString(fmt.Sprintf("## %s\n\n", strings.TrimSpace(heading.Text)))
+						fmt.Fprintf(&builder, "## %s\n\n", strings.TrimSpace(heading.Text))
 					case "h3":
-						builder.WriteString(fmt.Sprintf("### %s\n\n", strings.TrimSpace(heading.Text)))
+						fmt.Fprintf(&builder, "### %s\n\n", strings.TrimSpace(heading.Text))
 					case "h4":
-						builder.WriteString(fmt.Sprintf("#### %s\n\n", strings.TrimSpace(heading.Text)))
+						fmt.Fprintf(&builder, "#### %s\n\n", strings.TrimSpace(heading.Text))
 					}
 				})
 			}
 		case "p":
 			text := strings.TrimSpace(parseCloudflareInline(child))
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("%s\n\n", text))
+				fmt.Fprintf(&builder, "%s\n\n", text)
 			}
 		case "ul":
 			builder.WriteString(parseCloudflareList(child, false))
@@ -100,7 +100,7 @@ func parseCloudflareContent(e *colly.HTMLElement) string {
 		case "blockquote":
 			text := strings.TrimSpace(child.Text)
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("> %s\n\n", text))
+				fmt.Fprintf(&builder, "> %s\n\n", text)
 			}
 		case "figure":
 			if child.DOM.HasClass("kg-image-card") {
@@ -108,7 +108,7 @@ func parseCloudflareContent(e *colly.HTMLElement) string {
 					src := img.Attr("src")
 					alt := img.Attr("alt")
 					if src != "" {
-						builder.WriteString(fmt.Sprintf("![%s](%s)\n\n", alt, src))
+						fmt.Fprintf(&builder, "![%s](%s)\n\n", alt, src)
 					}
 				})
 			}
@@ -124,9 +124,9 @@ func parseCloudflareCodeBlock(e *colly.HTMLElement) string {
 	lang := parseCloudflareCodeLang(e)
 	code := strings.TrimRight(e.Text, "\n")
 	if lang != "" {
-		builder.WriteString(fmt.Sprintf("```%s\n%s\n```\n\n", lang, code))
+		fmt.Fprintf(&builder, "```%s\n%s\n```\n\n", lang, code)
 	} else {
-		builder.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+		fmt.Fprintf(&builder, "```\n%s\n```\n\n", code)
 	}
 	return builder.String()
 }
@@ -174,9 +174,9 @@ func parseCloudflareList(e *colly.HTMLElement, ordered bool) string {
 		}
 
 		if ordered {
-			builder.WriteString(fmt.Sprintf("%d. %s\n", index, bulletText))
+			fmt.Fprintf(&builder, "%d. %s\n", index, bulletText)
 		} else {
-			builder.WriteString(fmt.Sprintf("* %s\n", bulletText))
+			fmt.Fprintf(&builder, "* %s\n", bulletText)
 		}
 	})
 	builder.WriteString("\n")
@@ -195,12 +195,12 @@ func parseCloudflareInline(e *colly.HTMLElement) string {
 			sel := e.DOM.FindNodes(node)
 			switch node.Data {
 			case "code":
-				builder.WriteString(fmt.Sprintf("`%s`", sel.Text()))
+				fmt.Fprintf(&builder, "`%s`", sel.Text())
 			case "a":
 				href, _ := sel.Attr("href")
 				linkText := parseCloudflareInlineNodes(sel.Contents().Nodes)
 				if href != "" {
-					builder.WriteString(fmt.Sprintf("[%s](%s)", linkText, href))
+					fmt.Fprintf(&builder, "[%s](%s)", linkText, href)
 				} else {
 					builder.WriteString(linkText)
 				}
@@ -208,13 +208,13 @@ func parseCloudflareInline(e *colly.HTMLElement) string {
 				text := parseCloudflareInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("**%s**", trimmed))
+					fmt.Fprintf(&builder, "**%s**", trimmed)
 				}
 			case "i", "em":
 				text := parseCloudflareInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("*%s*", trimmed))
+					fmt.Fprintf(&builder, "*%s*", trimmed)
 				}
 			case "u":
 				builder.WriteString(sel.Text())
@@ -243,7 +243,7 @@ func parseCloudflareInlineNodes(nodes []*html.Node) string {
 						codeText.WriteString(c.Data)
 					}
 				}
-				builder.WriteString(fmt.Sprintf("`%s`", codeText.String()))
+				fmt.Fprintf(&builder, "`%s`", codeText.String())
 			case "u":
 				// <u> inside <a> — just emit the text
 				for c := node.FirstChild; c != nil; c = c.NextSibling {

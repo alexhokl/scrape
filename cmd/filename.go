@@ -30,8 +30,8 @@ func init() {
 	flags.StringVar(&filenameOpts.source, "source", "", "Source type (e.g., guardian, etc)")
 	flags.StringVarP(&filenameOpts.url, "url", "u", "", "URL of the article to scrape")
 
-	filenameCmd.MarkFlagRequired("source")
-	filenameCmd.MarkFlagRequired("url")
+	cobra.CheckErr(filenameCmd.MarkPersistentFlagRequired("source"))
+	cobra.CheckErr(filenameCmd.MarkPersistentFlagRequired("url"))
 }
 
 func validateFilenameOptions(_ *cobra.Command, _ []string) error {
@@ -69,7 +69,9 @@ func scrapeArticleFilename(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("error scraping filename of article: %w", err)
 	}
-	fmt.Fprintln(os.Stdout, markdownStr)
+	if _, err := fmt.Fprintln(os.Stdout, markdownStr); err != nil {
+		return fmt.Errorf("error writing output: %w", err)
+	}
 
 	return nil
 }

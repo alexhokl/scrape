@@ -136,7 +136,7 @@ func parseWikipediaBlocks(container *colly.HTMLElement, builder *strings.Builder
 		case "p":
 			text := strings.TrimSpace(parseWikipediaInline(child))
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("%s\n\n", text))
+				fmt.Fprintf(builder, "%s\n\n", text)
 			}
 		case "ul":
 			// Skip portal boxes and other navigation-related lists.
@@ -152,11 +152,11 @@ func parseWikipediaBlocks(container *colly.HTMLElement, builder *strings.Builder
 			builder.WriteString(parseWikipediaList(child, true))
 		case "pre":
 			code := strings.TrimRight(child.Text, "\n")
-			builder.WriteString(fmt.Sprintf("```\n%s\n```\n\n", code))
+			fmt.Fprintf(builder, "```\n%s\n```\n\n", code)
 		case "blockquote":
 			text := strings.TrimSpace(child.Text)
 			if text != "" {
-				builder.WriteString(fmt.Sprintf("> %s\n\n", text))
+				fmt.Fprintf(builder, "> %s\n\n", text)
 			}
 		case "figure":
 			parseWikipediaFigure(child, builder)
@@ -229,7 +229,7 @@ func parseWikipediaFigure(e *colly.HTMLElement, builder *strings.Builder) {
 		if strings.HasPrefix(src, "//") {
 			src = "https:" + src
 		}
-		builder.WriteString(fmt.Sprintf("![%s](%s)\n\n", alt, src))
+		fmt.Fprintf(builder, "![%s](%s)\n\n", alt, src)
 	})
 }
 
@@ -245,9 +245,9 @@ func parseWikipediaList(e *colly.HTMLElement, ordered bool) string {
 
 		text := strings.TrimSpace(parseWikipediaInline(li))
 		if ordered {
-			builder.WriteString(fmt.Sprintf("%d. %s\n", index, text))
+			fmt.Fprintf(&builder, "%d. %s\n", index, text)
 		} else {
-			builder.WriteString(fmt.Sprintf("* %s\n", text))
+			fmt.Fprintf(&builder, "* %s\n", text)
 		}
 	})
 	builder.WriteString("\n")
@@ -273,7 +273,7 @@ func parseWikipediaInline(e *colly.HTMLElement) string {
 
 			switch node.Data {
 			case "code":
-				builder.WriteString(fmt.Sprintf("`%s`", sel.Text()))
+				fmt.Fprintf(&builder, "`%s`", sel.Text())
 			case "a":
 				href, _ := sel.Attr("href")
 				linkText := parseWikipediaInlineNodes(sel.Contents().Nodes)
@@ -286,7 +286,7 @@ func parseWikipediaInline(e *colly.HTMLElement) string {
 					if strings.HasPrefix(href, "/wiki/") {
 						href = "https://en.wikipedia.org" + href
 					}
-					builder.WriteString(fmt.Sprintf("[%s](%s)", linkText, href))
+					fmt.Fprintf(&builder, "[%s](%s)", linkText, href)
 				} else {
 					builder.WriteString(linkText)
 				}
@@ -294,13 +294,13 @@ func parseWikipediaInline(e *colly.HTMLElement) string {
 				text := parseWikipediaInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("**%s**", trimmed))
+					fmt.Fprintf(&builder, "**%s**", trimmed)
 				}
 			case "i", "em":
 				text := parseWikipediaInlineNodes(sel.Contents().Nodes)
 				trimmed := strings.TrimSpace(text)
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("*%s*", trimmed))
+					fmt.Fprintf(&builder, "*%s*", trimmed)
 				}
 			case "span":
 				// Skip mw-editsection spans, shortdescription spans, and
@@ -368,7 +368,7 @@ func parseWikipediaInlineNodes(nodes []*html.Node) string {
 						codeText.WriteString(c.Data)
 					}
 				}
-				builder.WriteString(fmt.Sprintf("`%s`", codeText.String()))
+				fmt.Fprintf(&builder, "`%s`", codeText.String())
 			case "b", "strong":
 				var text strings.Builder
 				for c := node.FirstChild; c != nil; c = c.NextSibling {
@@ -378,7 +378,7 @@ func parseWikipediaInlineNodes(nodes []*html.Node) string {
 				}
 				trimmed := strings.TrimSpace(text.String())
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("**%s**", trimmed))
+					fmt.Fprintf(&builder, "**%s**", trimmed)
 				}
 			case "i", "em":
 				var text strings.Builder
@@ -389,7 +389,7 @@ func parseWikipediaInlineNodes(nodes []*html.Node) string {
 				}
 				trimmed := strings.TrimSpace(text.String())
 				if trimmed != "" {
-					builder.WriteString(fmt.Sprintf("*%s*", trimmed))
+					fmt.Fprintf(&builder, "*%s*", trimmed)
 				}
 			case "sup":
 				// Skip citation superscripts inside links.
