@@ -1083,3 +1083,78 @@ func TestWikipediaScraper_ScrapeArticle_ExcludesShortDescription(t *testing.T) {
 		t.Errorf("expected real content, got: %q", result)
 	}
 }
+
+func TestWikipediaScraper_ScrapeArticle_ParsoidSections(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<h1 id="firstHeading"><span class="mw-page-title-main">Merkle tree</span></h1>
+	<div id="mw-content-text" class="mw-body-content">
+		<div class="mw-content-ltr mw-parser-output">
+			<section data-mw-section-id="0">
+				<p>Lead paragraph.</p>
+			</section>
+			<section data-mw-section-id="1">
+				<div class="mw-heading mw-heading2"><h2 id="Overview">Overview</h2></div>
+				<p>Overview text.</p>
+				<section data-mw-section-id="2">
+					<div class="mw-heading mw-heading3"><h3 id="Second_preimage_attack">Second preimage attack</h3></div>
+					<p>Nested text.</p>
+				</section>
+			</section>
+			<section data-mw-section-id="3">
+				<div class="mw-heading mw-heading2"><h2 id="See_also">See also</h2></div>
+				<ul><li>See also item</li></ul>
+			</section>
+			<section data-mw-section-id="4">
+				<div class="mw-heading mw-heading2"><h2 id="References">References</h2></div>
+				<section data-mw-section-id="5">
+					<div class="mw-heading mw-heading3"><h3 id="Sub">Sub</h3></div>
+					<p>Reference text.</p>
+				</section>
+			</section>
+		</div>
+	</div>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &WikipediaScraper{}
+	result, err := scraper.ScrapeArticle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := []string{
+		"Lead paragraph.",
+		"## Overview",
+		"Overview text.",
+		"### Second preimage attack",
+		"Nested text.",
+	}
+	lastIndex := -1
+	for _, s := range expected {
+		index := strings.Index(result, s)
+		if index == -1 {
+			t.Errorf("expected %q in result, got: %q", s, result)
+			continue
+		}
+		if index < lastIndex {
+			t.Errorf("expected %q to appear after previous content, got: %q", s, result)
+		}
+		lastIndex = index
+	}
+
+	for _, s := range []string{"See also", "References", "Reference text."} {
+		if strings.Contains(result, s) {
+			t.Errorf("expected %q to be skipped, got: %q", s, result)
+		}
+	}
+}

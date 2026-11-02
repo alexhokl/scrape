@@ -83,8 +83,23 @@ func parseWikipediaContent(e *colly.HTMLElement) string {
 	// Track whether we are inside a section that should be skipped.
 	skipping := false
 
-	e.ForEach("*", func(_ int, child *colly.HTMLElement) {
-		if !child.DOM.Parent().IsSelection(e.DOM) {
+	parseWikipediaBlocks(e, &builder, &skipping)
+
+	return builder.String()
+}
+
+// parseWikipediaBlocks renders the direct children of container as markdown.
+// Parsoid HTML wraps each section in nested <section> elements, which are
+// processed recursively; skipping is shared so that a skipped section's
+// subsections are skipped as well.
+func parseWikipediaBlocks(container *colly.HTMLElement, builder *strings.Builder, skipping *bool) {
+	container.ForEach("*", func(_ int, child *colly.HTMLElement) {
+		if !child.DOM.Parent().IsSelection(container.DOM) {
+			return
+		}
+
+		if child.Name == "section" {
+			parseWikipediaBlocks(child, builder, skipping)
 			return
 		}
 
@@ -98,22 +113,22 @@ func parseWikipediaContent(e *colly.HTMLElement) string {
 			// Check if this section should be skipped.
 			headingText := extractWikipediaHeadingText(child)
 			if wikipediaSkipSections[headingText] {
-				skipping = true
+				*skipping = true
 				return
 			}
 
 			// A non-skipped heading resets skipping for mw-heading2 level.
 			if child.DOM.HasClass("mw-heading2") {
-				skipping = false
+				*skipping = false
 			}
 
-			if !skipping {
+			if !*skipping {
 				builder.WriteString(heading)
 			}
 			return
 		}
 
-		if skipping {
+		if *skipping {
 			return
 		}
 
@@ -144,15 +159,13 @@ func parseWikipediaContent(e *colly.HTMLElement) string {
 				builder.WriteString(fmt.Sprintf("> %s\n\n", text))
 			}
 		case "figure":
-			parseWikipediaFigure(child, &builder)
+			parseWikipediaFigure(child, builder)
 		case "table":
 			if child.DOM.HasClass("wikitable") {
 				builder.WriteString(parseWikipediaTable(child))
 			}
 		}
 	})
-
-	return builder.String()
 }
 
 // parseWikipediaHeading renders a mw-heading div as a markdown heading.
