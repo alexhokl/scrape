@@ -2,6 +2,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/alexhokl/helper/cli"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +18,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	_ = rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func init() {
