@@ -46,6 +46,7 @@ func validateTitleOptions(_ *cobra.Command, _ []string) error {
 	case "wikipedia":
 	case "ollama":
 	case "grafana":
+	case "unseenjapan":
 
 	default:
 		return fmt.Errorf("invalid source: %s", opts.source)
