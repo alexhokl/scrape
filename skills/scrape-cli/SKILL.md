@@ -1,6 +1,6 @@
 ---
 name: scrape-cli
-description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com) and asked to extract content.
+description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org) and asked to extract content.
 ---
 
 # scrape-cli
@@ -39,6 +39,7 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 | `ollama`       | `ollama.com`              | yes     | —     | yes   | yes      |
 | `grafana`      | `grafana.com`             | yes     | —     | yes   | yes      |
 | `unseenjapan`  | `unseen-japan.com`        | yes     | —     | yes   | yes      |
+| `propublica`   | `propublica.org`          | yes     | —     | yes   | yes      |
 
 > **Note:** `newyorktimes` and `tailscale` only support `article`; attempting `title`
 > or `filename` with those sources returns an `"invalid source"` error. Use `article`

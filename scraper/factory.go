@@ -39,6 +39,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &GrafanaScraper{}, nil
 	case "unseenjapan":
 		return &UnseenJapanScraper{}, nil
+	case "propublica":
+		return &ProPublicaScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
