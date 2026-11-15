@@ -58,6 +58,7 @@ func validateArticleOptions(_ *cobra.Command, _ []string) error {
 	case "grafana":
 	case "unseenjapan":
 	case "propublica":
+	case "japantimes":
 
 	default:
 		return fmt.Errorf("invalid source: %s", opts.source)

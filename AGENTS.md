@@ -27,6 +27,7 @@ scraper/             # Scraper interfaces, implementations, and utilities
   ollama.go          # OllamaScraper implementation
   unseen_japan.go    # UnseenJapanScraper implementation
   propublica.go      # ProPublicaScraper implementation
+  japan_times.go     # JapanTimesScraper implementation
   util.go            # Shared utility functions
 ```
 
@@ -122,7 +123,7 @@ task sec
   (`articleOpts`, `linksOpts`, `titleOpts`, `filenameOpts`).
 - **Cobra commands**: camelCase with `Cmd` suffix (`articleCmd`, `linksCmd`).
 - **Source type strings**: all lowercase (`"guardian"`, `"microsoft"`, `"go"`,
-  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`). Case-sensitive by design.
+  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`, `"japantimes"`). Case-sensitive by design.
 
 ### Error Handling
 
