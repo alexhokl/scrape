@@ -711,3 +711,44 @@ func TestTailscaleScraper_ScrapeArticle_MixedContent(t *testing.T) {
 		}
 	}
 }
+
+func TestTailscaleScraper_ScrapeArticle_Blog(t *testing.T) {
+	html := `<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+	<main>
+		<h1 class="h1-new mb-8 mt-7 text-heading-black">It&#x27;s time to make your own RSS reader</h1>
+		<div>
+			<div class="blog-content-prose Markdown-new">
+				<p>Set up <a href="https://www.freshrss.org/">FreshRSS</a> today.</p>
+				<h2>Getting started</h2>
+			</div>
+		</div>
+	</main>
+</body>
+</html>`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte(html))
+	}))
+	defer server.Close()
+
+	scraper := &TailscaleScraper{}
+	result, err := scraper.ScrapeArticle(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(result, "# It's time to make your own RSS reader") {
+		t.Errorf("expected blog title, got: %q", result)
+	}
+	if !strings.Contains(result, "FreshRSS") {
+		t.Errorf("expected blog paragraph, got: %q", result)
+	}
+	if !strings.Contains(result, "## Getting started") {
+		t.Errorf("expected blog heading, got: %q", result)
+	}
+}

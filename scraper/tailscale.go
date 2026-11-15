@@ -19,13 +19,13 @@ func (t *TailscaleScraper) ScrapeArticle(url string) (string, error) {
 
 	var markdown string
 
-	// title
-	c.OnHTML("article#main-content > h1", func(e *colly.HTMLElement) {
+	// title (docs and blog layouts)
+	c.OnHTML("article#main-content > h1, h1.h1-new", func(e *colly.HTMLElement) {
 		markdown += fmt.Sprintf("# %s\n\n", strings.TrimSpace(e.Text))
 	})
 
-	// article body
-	c.OnHTML("article#main-content > div.ts-prose", func(e *colly.HTMLElement) {
+	// article body (docs and blog layouts)
+	c.OnHTML("article#main-content > div.ts-prose, div.blog-content-prose", func(e *colly.HTMLElement) {
 		markdown += parseTailscaleContent(e)
 	})
 
@@ -42,7 +42,7 @@ func (t *TailscaleScraper) ScrapeTitle(url string) (string, error) {
 
 	var title string
 
-	c.OnHTML("article#main-content > h1", func(e *colly.HTMLElement) {
+	c.OnHTML("article#main-content > h1, h1.h1-new", func(e *colly.HTMLElement) {
 		title = strings.TrimSpace(e.Text)
 	})
 
