@@ -39,6 +39,22 @@ func validateLinksOptions(_ *cobra.Command, _ []string) error {
 
 	switch opts.source {
 	case "guardian":
+	case "publickey":
+	case "proton":
+	case "darkthread":
+	case "rakyll":
+	case "signal":
+	case "charm":
+	case "filippo":
+	case "juliaevans":
+	case "kleppmann":
+	case "mitchellh":
+	case "jessfraz":
+	case "rickstrahl":
+	case "hanselman":
+	case "devblogs":
+	case "observationdeck":
+	case "bellingcat":
 		break
 
 	default:

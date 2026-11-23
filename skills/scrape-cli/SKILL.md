@@ -1,6 +1,6 @@
 ---
 name: scrape-cli
-description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp) and asked to extract content.
+description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp, publickey1.jp, proton.me/blog, blog.darkthread.net, rakyll.org, signal.org/blog, charm.land/blog, words.filippo.io, jvns.ca, martin.kleppmann.com, mitchellh.com, blog.jessfraz.com, weblog.west-wind.com, hanselman.com/blog, devblogs.microsoft.com, bcantrill.dtrace.org, bellingcat.com) and asked to extract content or list a blog's posts.
 ---
 
 # scrape-cli
@@ -41,10 +41,32 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 | `unseenjapan`  | `unseen-japan.com`        | yes     | —     | yes   | yes      |
 | `propublica`   | `propublica.org`          | yes     | —     | yes   | yes      |
 | `japantimes`   | `japantimes.co.jp`        | yes     | —     | yes   | yes      |
+| `publickey`      | `www.publickey1.jp`       | yes     | yes   | yes   | yes      |
+| `proton`         | `proton.me/blog`          | yes     | yes   | yes   | yes      |
+| `darkthread`     | `blog.darkthread.net`     | yes     | yes   | yes   | yes      |
+| `rakyll`         | `rakyll.org`              | yes     | yes   | yes   | yes      |
+| `signal`         | `signal.org/blog`         | yes     | yes   | yes   | yes      |
+| `charm`          | `charm.land/blog`         | yes     | yes   | yes   | yes      |
+| `filippo`        | `words.filippo.io`        | yes     | yes   | yes   | yes      |
+| `juliaevans`     | `jvns.ca`                 | yes     | yes   | yes   | yes      |
+| `kleppmann`      | `martin.kleppmann.com`    | yes     | yes   | yes   | yes      |
+| `mitchellh`      | `mitchellh.com/writing`   | yes     | yes   | yes   | yes      |
+| `jessfraz`       | `blog.jessfraz.com`       | yes     | yes   | yes   | yes      |
+| `rickstrahl`     | `weblog.west-wind.com`    | yes     | yes   | yes   | yes      |
+| `hanselman`      | `www.hanselman.com/blog`  | yes     | yes   | yes   | yes      |
+| `devblogs`       | `devblogs.microsoft.com`  | yes     | yes   | yes   | yes      |
+| `observationdeck` | `bcantrill.dtrace.org`    | yes     | yes   | yes   | yes      |
+| `bellingcat`     | `www.bellingcat.com`      | yes     | yes   | yes   | yes      |
 
 > **Note:** `newyorktimes` and `tailscale` only support `article`; attempting `title`
 > or `filename` with those sources returns an `"invalid source"` error. Use `article`
 > and extract the title from the Markdown output if needed.
+>
+> **Note:** for `links`, pass the blog's index page. Use
+> `https://rakyll.org/archive/` for `rakyll` and
+> `https://martin.kleppmann.com/archive.html` for `kleppmann`, as their home
+> pages do not list every post. `devblogs` works on any blog under
+> `devblogs.microsoft.com` (e.g. `https://devblogs.microsoft.com/dotnet/`).
 >
 > **Note:** `cloudflare` targets `blog.cloudflare.com` (the Ghost CMS blog), not
 > `developers.cloudflare.com` (the docs site). Using the wrong domain will produce
@@ -85,10 +107,11 @@ scrape article --source wikipedia -u "https://en.wikipedia.org/wiki/Merkle_tree"
 
 ### Scrape links from a page
 
-Only supported for `guardian`.
+Supported for `guardian` and the sources whose `links` column is "yes" above.
 
 ```bash
 scrape links --source guardian -u "https://www.theguardian.com/uk"
+scrape links --source signal -u "https://signal.org/blog/"
 ```
 
 Output format: one `[link text](url)` per line.

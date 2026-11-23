@@ -49,6 +49,22 @@ func validateFilenameOptions(_ *cobra.Command, _ []string) error {
 	case "unseenjapan":
 	case "propublica":
 	case "japantimes":
+	case "publickey":
+	case "proton":
+	case "darkthread":
+	case "rakyll":
+	case "signal":
+	case "charm":
+	case "filippo":
+	case "juliaevans":
+	case "kleppmann":
+	case "mitchellh":
+	case "jessfraz":
+	case "rickstrahl":
+	case "hanselman":
+	case "devblogs":
+	case "observationdeck":
+	case "bellingcat":
 
 	default:
 		return fmt.Errorf("invalid source: %s", opts.source)

@@ -228,3 +228,22 @@ func TestFilenameOptions_StructFields(t *testing.T) {
 		t.Errorf("expected url to be 'https://www.theguardian.com/test', got %q", opts.url)
 	}
 }
+
+func TestValidateFilenameOptions_FeedSources(t *testing.T) {
+	// Save original opts and restore after test
+	originalOpts := filenameOpts
+	defer func() { filenameOpts = originalOpts }()
+
+	for _, source := range []string{"publickey", "proton", "darkthread", "rakyll", "signal", "charm", "filippo", "juliaevans", "kleppmann", "mitchellh", "jessfraz", "rickstrahl", "hanselman", "devblogs", "observationdeck", "bellingcat"} {
+		t.Run(source, func(t *testing.T) {
+			filenameOpts = filenameOptions{
+				source: source,
+				url:    "https://example.com/post/",
+			}
+
+			if err := validateFilenameOptions(&cobra.Command{}, []string{}); err != nil {
+				t.Errorf("expected no error for valid %s source, got: %v", source, err)
+			}
+		})
+	}
+}

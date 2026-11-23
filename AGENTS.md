@@ -28,6 +28,13 @@ scraper/             # Scraper interfaces, implementations, and utilities
   unseen_japan.go    # UnseenJapanScraper implementation
   propublica.go      # ProPublicaScraper implementation
   japan_times.go     # JapanTimesScraper implementation
+  markdown.go        # Generic HTML-to-markdown converter (htmlToMarkdown)
+  site.go            # siteConfig: selector-driven article/title/links scraping
+  publickey.go, proton.go, darkthread.go, rakyll.go, signal.go, charm.go,
+  filippo.go, julia_evans.go, kleppmann.go, mitchell_hashimoto.go,
+  jess_frazelle.go, rick_strahl.go, hanselman.go, devblogs.go,
+  observation_deck.go, bellingcat.go
+                     # siteConfig-based scrapers (ArticleScraper + LinkScraper)
   util.go            # Shared utility functions
 ```
 
@@ -123,7 +130,10 @@ task sec
   (`articleOpts`, `linksOpts`, `titleOpts`, `filenameOpts`).
 - **Cobra commands**: camelCase with `Cmd` suffix (`articleCmd`, `linksCmd`).
 - **Source type strings**: all lowercase (`"guardian"`, `"microsoft"`, `"go"`,
-  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`, `"japantimes"`). Case-sensitive by design.
+  `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`, `"japantimes"`, `"publickey"`, `"proton"`,
+  `"darkthread"`, `"rakyll"`, `"signal"`, `"charm"`, `"filippo"`, `"juliaevans"`,
+  `"kleppmann"`, `"mitchellh"`, `"jessfraz"`, `"rickstrahl"`, `"hanselman"`,
+  `"devblogs"`, `"observationdeck"`, `"bellingcat"`). Case-sensitive by design.
 
 ### Error Handling
 
@@ -175,6 +185,13 @@ Each command file follows this pattern:
   the original value with `defer`.
 
 ### Adding a New Scraper
+
+For a site with a regular layout, prefer a `siteConfig`-based scraper (see
+`scraper/signal.go`): declare the title, body, skip and links CSS selectors,
+and delegate the four methods to it. The body is rendered by `htmlToMarkdown`
+in `scraper/markdown.go`. Test it with `runSiteTests` in `scraper/site_test.go`
+and HTML fixtures trimmed from the real pages. Write a hand-rolled scraper only
+when the content needs site-specific parsing.
 
 1. Create `scraper/<source_name>.go` with a struct implementing `ArticleScraper`
    and/or `LinkScraper`.

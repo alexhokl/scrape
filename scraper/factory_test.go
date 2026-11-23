@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -180,6 +181,50 @@ func TestCreateLinkScraper_CaseSensitive(t *testing.T) {
 
 			if scraper != nil {
 				t.Errorf("expected nil scraper for %q, got %v", tc, scraper)
+			}
+		})
+	}
+}
+
+func TestCreateScrapers_FeedSources(t *testing.T) {
+	tests := []struct {
+		source   string
+		expected siteScraper
+	}{
+		{"publickey", &PublickeyScraper{}},
+		{"proton", &ProtonScraper{}},
+		{"darkthread", &DarkthreadScraper{}},
+		{"rakyll", &RakyllScraper{}},
+		{"signal", &SignalScraper{}},
+		{"charm", &CharmScraper{}},
+		{"filippo", &FilippoScraper{}},
+		{"juliaevans", &JuliaEvansScraper{}},
+		{"kleppmann", &KleppmannScraper{}},
+		{"mitchellh", &MitchellHashimotoScraper{}},
+		{"jessfraz", &JessFrazelleScraper{}},
+		{"rickstrahl", &RickStrahlScraper{}},
+		{"hanselman", &HanselmanScraper{}},
+		{"devblogs", &DevBlogsScraper{}},
+		{"observationdeck", &ObservationDeckScraper{}},
+		{"bellingcat", &BellingcatScraper{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.source, func(t *testing.T) {
+			articleScraper, err := CreateArticleScraper(tt.source)
+			if err != nil {
+				t.Fatalf("unexpected error creating article scraper: %v", err)
+			}
+			if fmt.Sprintf("%T", articleScraper) != fmt.Sprintf("%T", tt.expected) {
+				t.Errorf("expected article scraper %T, got %T", tt.expected, articleScraper)
+			}
+
+			linkScraper, err := CreateLinkScraper(tt.source)
+			if err != nil {
+				t.Fatalf("unexpected error creating link scraper: %v", err)
+			}
+			if fmt.Sprintf("%T", linkScraper) != fmt.Sprintf("%T", tt.expected) {
+				t.Errorf("expected link scraper %T, got %T", tt.expected, linkScraper)
 			}
 		})
 	}

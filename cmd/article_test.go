@@ -319,3 +319,23 @@ func TestArticleOptions_StructFields(t *testing.T) {
 		t.Errorf("expected url to be 'https://www.theguardian.com/test', got %q", opts.url)
 	}
 }
+
+func TestValidateArticleOptions_FeedSources(t *testing.T) {
+	// Save original opts and restore after test
+	originalOpts := articleOpts
+	defer func() { articleOpts = originalOpts }()
+
+	for _, source := range []string{"publickey", "proton", "darkthread", "rakyll", "signal", "charm", "filippo", "juliaevans", "kleppmann", "mitchellh", "jessfraz", "rickstrahl", "hanselman", "devblogs", "observationdeck", "bellingcat"} {
+		t.Run(source, func(t *testing.T) {
+			articleOpts = articleOptions{
+				format: "markdown",
+				source: source,
+				url:    "https://example.com/post/",
+			}
+
+			if err := validateArticleOptions(&cobra.Command{}, []string{}); err != nil {
+				t.Errorf("expected no error for valid %s source, got: %v", source, err)
+			}
+		})
+	}
+}
