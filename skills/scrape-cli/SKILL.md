@@ -1,6 +1,6 @@
 ---
 name: scrape-cli
-description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp, publickey1.jp, proton.me/blog, blog.darkthread.net, rakyll.org, signal.org/blog, charm.land/blog, words.filippo.io, jvns.ca, martin.kleppmann.com, mitchellh.com, blog.jessfraz.com, weblog.west-wind.com, hanselman.com/blog, devblogs.microsoft.com, bcantrill.dtrace.org, bellingcat.com) and asked to extract content or list a blog's posts.
+description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp, publickey1.jp, proton.me/blog, blog.darkthread.net, rakyll.org, signal.org/blog, charm.land/blog, words.filippo.io, jvns.ca, martin.kleppmann.com, mitchellh.com, blog.jessfraz.com, weblog.west-wind.com, hanselman.com/blog, devblogs.microsoft.com, bcantrill.dtrace.org, bellingcat.com, medium.com) and asked to extract content or list a blog's posts.
 ---
 
 # scrape-cli
@@ -57,6 +57,7 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 | `devblogs`       | `devblogs.microsoft.com`  | yes     | yes   | yes   | yes      |
 | `observationdeck` | `bcantrill.dtrace.org`    | yes     | yes   | yes   | yes      |
 | `bellingcat`     | `www.bellingcat.com`      | yes     | yes   | yes   | yes      |
+| `medium`         | `medium.com`, `*.medium.com` | yes  | yes   | yes   | yes      |
 
 > **Note:** `newyorktimes` and `tailscale` only support `article`; attempting `title`
 > or `filename` with those sources returns an `"invalid source"` error. Use `article`
@@ -67,6 +68,12 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 > `https://martin.kleppmann.com/archive.html` for `kleppmann`, as their home
 > pages do not list every post. `devblogs` works on any blog under
 > `devblogs.microsoft.com` (e.g. `https://devblogs.microsoft.com/dotnet/`).
+>
+> **Note:** `medium` reads the RSS feed of the author or publication, as
+> Medium blocks scraping of its pages. Only recent posts (about the last 10)
+> are found, and posts behind the paywall fail with an error. For `links`,
+> pass a profile or publication URL (e.g. `https://medium.com/@user` or
+> `https://user.medium.com/`).
 >
 > **Note:** `cloudflare` targets `blog.cloudflare.com` (the Ghost CMS blog), not
 > `developers.cloudflare.com` (the docs site). Using the wrong domain will produce

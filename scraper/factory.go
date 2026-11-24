@@ -41,6 +41,8 @@ func CreateLinkScraper(sourceType string) (LinkScraper, error) {
 		return &ObservationDeckScraper{}, nil
 	case "bellingcat":
 		return &BellingcatScraper{}, nil
+	case "medium":
+		return &MediumScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)
@@ -107,6 +109,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &ObservationDeckScraper{}, nil
 	case "bellingcat":
 		return &BellingcatScraper{}, nil
+	case "medium":
+		return &MediumScraper{}, nil
 
 	default:
 		return nil, fmt.Errorf("source %s is not supported", sourceType)

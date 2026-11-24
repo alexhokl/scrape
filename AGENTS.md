@@ -28,6 +28,7 @@ scraper/             # Scraper interfaces, implementations, and utilities
   unseen_japan.go    # UnseenJapanScraper implementation
   propublica.go      # ProPublicaScraper implementation
   japan_times.go     # JapanTimesScraper implementation
+  medium.go          # MediumScraper implementation (via RSS feeds)
   markdown.go        # Generic HTML-to-markdown converter (htmlToMarkdown)
   site.go            # siteConfig: selector-driven article/title/links scraping
   publickey.go, proton.go, darkthread.go, rakyll.go, signal.go, charm.go,
@@ -133,7 +134,7 @@ task sec
   `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`, `"japantimes"`, `"publickey"`, `"proton"`,
   `"darkthread"`, `"rakyll"`, `"signal"`, `"charm"`, `"filippo"`, `"juliaevans"`,
   `"kleppmann"`, `"mitchellh"`, `"jessfraz"`, `"rickstrahl"`, `"hanselman"`,
-  `"devblogs"`, `"observationdeck"`, `"bellingcat"`). Case-sensitive by design.
+  `"devblogs"`, `"observationdeck"`, `"bellingcat"`, `"medium"`). Case-sensitive by design.
 
 ### Error Handling
 

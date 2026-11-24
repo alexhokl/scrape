@@ -55,6 +55,7 @@ func validateLinksOptions(_ *cobra.Command, _ []string) error {
 	case "devblogs":
 	case "observationdeck":
 	case "bellingcat":
+	case "medium":
 		break
 
 	default:
