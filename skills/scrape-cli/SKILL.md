@@ -1,6 +1,6 @@
 ---
 name: scrape-cli
-description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp, publickey1.jp, proton.me/blog, blog.darkthread.net, rakyll.org, signal.org/blog, charm.land/blog, words.filippo.io, jvns.ca, martin.kleppmann.com, mitchellh.com, blog.jessfraz.com, weblog.west-wind.com, hanselman.com/blog, devblogs.microsoft.com, bcantrill.dtrace.org, bellingcat.com, medium.com) and asked to extract content or list a blog's posts.
+description: Use when the user asks to scrape article content, links, titles, or filenames from websites using the local `scrape` CLI tool. Trigger when given a URL from a supported site (theguardian.com, learn.microsoft.com, go.dev, tofugu.com, nytimes.com, tailscale.com, blog.cloudflare.com, en.wikipedia.org, ollama.com, grafana.com, unseen-japan.com, propublica.org, japantimes.co.jp, publickey1.jp, proton.me/blog, blog.darkthread.net, rakyll.org, signal.org/blog, charm.land/blog, words.filippo.io, jvns.ca, martin.kleppmann.com, mitchellh.com, blog.jessfraz.com, weblog.west-wind.com, hanselman.com/blog, devblogs.microsoft.com, bcantrill.dtrace.org, bellingcat.com, bbc.com/sport, medium.com) and asked to extract content or list a blog's posts.
 ---
 
 # scrape-cli
@@ -57,6 +57,7 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 | `devblogs`       | `devblogs.microsoft.com`  | yes     | yes   | yes   | yes      |
 | `observationdeck` | `bcantrill.dtrace.org`    | yes     | yes   | yes   | yes      |
 | `bellingcat`     | `www.bellingcat.com`      | yes     | yes   | yes   | yes      |
+| `bbcsport`       | `www.bbc.com/sport`       | yes     | yes   | yes   | yes      |
 | `medium`         | `medium.com`, `*.medium.com` | yes  | yes   | yes   | yes      |
 
 > **Note:** `newyorktimes` and `tailscale` only support `article`; attempting `title`
@@ -68,6 +69,8 @@ they are **allowed in plan mode**. Writing output to a file (e.g., `> file.md`) 
 > `https://martin.kleppmann.com/archive.html` for `kleppmann`, as their home
 > pages do not list every post. `devblogs` works on any blog under
 > `devblogs.microsoft.com` (e.g. `https://devblogs.microsoft.com/dotnet/`).
+> For `bbcsport`, pass a sport index page (e.g.
+> `https://www.bbc.com/sport/football`); live pages are not listed.
 >
 > **Note:** `medium` reads the RSS feed of the author or publication, as
 > Medium blocks scraping of its pages. Only recent posts (about the last 10)

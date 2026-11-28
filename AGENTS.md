@@ -34,7 +34,7 @@ scraper/             # Scraper interfaces, implementations, and utilities
   publickey.go, proton.go, darkthread.go, rakyll.go, signal.go, charm.go,
   filippo.go, julia_evans.go, kleppmann.go, mitchell_hashimoto.go,
   jess_frazelle.go, rick_strahl.go, hanselman.go, devblogs.go,
-  observation_deck.go, bellingcat.go
+  observation_deck.go, bellingcat.go, bbc_sport.go
                      # siteConfig-based scrapers (ArticleScraper + LinkScraper)
   util.go            # Shared utility functions
 ```
@@ -134,7 +134,7 @@ task sec
   `"tofugu"`, `"newyorktimes"`, `"tailscale"`, `"cloudflare"`, `"wikipedia"`, `"ollama"`, `"grafana"`, `"unseenjapan"`, `"propublica"`, `"japantimes"`, `"publickey"`, `"proton"`,
   `"darkthread"`, `"rakyll"`, `"signal"`, `"charm"`, `"filippo"`, `"juliaevans"`,
   `"kleppmann"`, `"mitchellh"`, `"jessfraz"`, `"rickstrahl"`, `"hanselman"`,
-  `"devblogs"`, `"observationdeck"`, `"bellingcat"`, `"medium"`). Case-sensitive by design.
+  `"devblogs"`, `"observationdeck"`, `"bellingcat"`, `"bbcsport"`, `"medium"`). Case-sensitive by design.
 
 ### Error Handling
 

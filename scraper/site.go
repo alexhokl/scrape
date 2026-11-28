@@ -26,11 +26,17 @@ type siteConfig struct {
 	// linkText optionally selects the element inside each link holding its
 	// text, for links that also wrap an excerpt or a date.
 	linkText string
+	// userAgent optionally replaces colly's default User-Agent, for sites
+	// that reject it.
+	userAgent string
 }
 
 // visit fetches the page at pageURL and calls fn with its document and URL.
 func (s siteConfig) visit(pageURL string, fn func(doc *goquery.Selection, base *url.URL)) error {
 	collector := colly.NewCollector()
+	if s.userAgent != "" {
+		collector.UserAgent = s.userAgent
+	}
 	collector.OnHTML("html", func(e *colly.HTMLElement) {
 		fn(e.DOM, e.Request.URL)
 	})

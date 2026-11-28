@@ -65,6 +65,7 @@ func validateFilenameOptions(_ *cobra.Command, _ []string) error {
 	case "devblogs":
 	case "observationdeck":
 	case "bellingcat":
+	case "bbcsport":
 	case "medium":
 
 	default:

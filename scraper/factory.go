@@ -41,6 +41,8 @@ func CreateLinkScraper(sourceType string) (LinkScraper, error) {
 		return &ObservationDeckScraper{}, nil
 	case "bellingcat":
 		return &BellingcatScraper{}, nil
+	case "bbcsport":
+		return &BBCSportScraper{}, nil
 	case "medium":
 		return &MediumScraper{}, nil
 
@@ -109,6 +111,8 @@ func CreateArticleScraper(sourceType string) (ArticleScraper, error) {
 		return &ObservationDeckScraper{}, nil
 	case "bellingcat":
 		return &BellingcatScraper{}, nil
+	case "bbcsport":
+		return &BBCSportScraper{}, nil
 	case "medium":
 		return &MediumScraper{}, nil
 

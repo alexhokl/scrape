@@ -207,6 +207,7 @@ func TestCreateScrapers_FeedSources(t *testing.T) {
 		{"devblogs", &DevBlogsScraper{}},
 		{"observationdeck", &ObservationDeckScraper{}},
 		{"bellingcat", &BellingcatScraper{}},
+		{"bbcsport", &BBCSportScraper{}},
 	}
 
 	for _, tt := range tests {

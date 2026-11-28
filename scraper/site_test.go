@@ -29,6 +29,8 @@ type siteTestCase struct {
 	indexHTML string
 	// links maps the expected link text to its path on the test server
 	links map[string]string
+	// filename is the expected file name; empty means "sample-post"
+	filename string
 }
 
 const siteTestArticlePath = "/blog/sample-post/"
@@ -88,8 +90,12 @@ func runSiteTests(t *testing.T, tc siteTestCase) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if result != "sample-post" {
-			t.Errorf("expected %q, got %q", "sample-post", result)
+		expected := tc.filename
+		if expected == "" {
+			expected = "sample-post"
+		}
+		if result != expected {
+			t.Errorf("expected %q, got %q", expected, result)
 		}
 	})
 
@@ -219,5 +225,22 @@ func TestSiteConfig_Filename(t *testing.T) {
 				t.Errorf("filename(%q) = %q, want %q", tt.input, result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestSiteConfig_UserAgent(t *testing.T) {
+	var got string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = r.UserAgent()
+		_, _ = w.Write([]byte(`<html><body><h1>Title</h1></body></html>`))
+	}))
+	defer server.Close()
+
+	site := siteConfig{title: "h1", userAgent: "Mozilla/5.0 (compatible; scrape)"}
+	if _, err := site.scrapeTitle(server.URL); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != site.userAgent {
+		t.Errorf("expected User-Agent %q, got %q", site.userAgent, got)
 	}
 }

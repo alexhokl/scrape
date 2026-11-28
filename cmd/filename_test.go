@@ -234,7 +234,7 @@ func TestValidateFilenameOptions_FeedSources(t *testing.T) {
 	originalOpts := filenameOpts
 	defer func() { filenameOpts = originalOpts }()
 
-	for _, source := range []string{"publickey", "proton", "darkthread", "rakyll", "signal", "charm", "filippo", "juliaevans", "kleppmann", "mitchellh", "jessfraz", "rickstrahl", "hanselman", "devblogs", "observationdeck", "bellingcat", "medium"} {
+	for _, source := range []string{"publickey", "proton", "darkthread", "rakyll", "signal", "charm", "filippo", "juliaevans", "kleppmann", "mitchellh", "jessfraz", "rickstrahl", "hanselman", "devblogs", "observationdeck", "bellingcat", "bbcsport", "medium"} {
 		t.Run(source, func(t *testing.T) {
 			filenameOpts = filenameOptions{
 				source: source,
